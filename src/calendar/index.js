@@ -1,10 +1,10 @@
-import React, {Component} from 'react';
-import {View, ViewPropTypes} from 'react-native';
+import React, { Component } from 'react';
+import { View, ViewPropTypes } from 'react-native';
 import PropTypes from 'prop-types';
 import XDate from 'xdate';
 
 import dateutils from '../dateutils';
-import {xdateToData, parseDate} from '../interface';
+import { xdateToData, parseDate } from '../interface';
 import styleConstructor from './style';
 import Day from './day/basic';
 import UnitDay from './day/period';
@@ -13,12 +13,16 @@ import MultiPeriodDay from './day/multi-period';
 import SingleDay from './day/custom';
 import CalendarHeader from './header';
 import shouldComponentUpdate from './updater';
-import {SELECT_DATE_SLOT} from '../testIDs';
-
+import { SELECT_DATE_SLOT } from '../testIDs';
+import { FlingGestureHandler, State, Directions } from 'react-native-gesture-handler'
+import Modal from 'react-native-modal';
 
 //Fallback when RN version is < 0.44
 const viewPropTypes = ViewPropTypes || View.propTypes;
 const EmptyArray = [];
+
+//주수에 따른 달력 높이 설정 위한 변수
+var days_len;
 
 /**
  * @description: Calendar component
@@ -84,11 +88,14 @@ class Calendar extends Component {
     /** Style passed to the header */
     headerStyle: PropTypes.oneOfType([PropTypes.object, PropTypes.number, PropTypes.array]),
     /** Provide aria-level for calendar heading for proper accessibility when used with web (react-native-web) */
-    webAriaLevel: PropTypes.number
+    webAriaLevel: PropTypes.number,
+    /** calendar flag */
+    calendar_flag: PropTypes.bool
   };
 
   constructor(props) {
     super(props);
+
 
     this.style = styleConstructor(this.props.theme);
 
@@ -102,6 +109,21 @@ class Calendar extends Component {
     this.longPressDay = this.longPressDay.bind(this);
     this.shouldComponentUpdate = shouldComponentUpdate;
   }
+
+  //swipe 기능 설정
+  _onLeftFlingHandlerStateChange = ({ nativeEvent }) => {
+    if (nativeEvent.oldState === State.ACTIVE) {
+      this.addMonth(1);
+    }
+  }
+
+  //swipe 기능 설정
+  _onRightFlingHandlerStateChange = ({ nativeEvent }) => {
+    if (nativeEvent.oldState === State.ACTIVE) {
+      this.addMonth(-1);
+    }
+  }
+
 
   UNSAFE_componentWillReceiveProps(nextProps) {
     const current = parseDate(nextProps.current);
@@ -173,14 +195,42 @@ class Calendar extends Component {
     }
 
     if (!dateutils.sameMonth(day, this.state.currentMonth) && this.props.hideExtraDays) {
-      return (<View key={id} style={{flex: 1}}/>);
+      return (<View key={id} style={{ flex: 1 }} />);
     }
 
     const DayComp = this.getDayComponent();
     const date = day.getDate();
     const dateAsObject = xdateToData(day);
     const accessibilityLabel = `${state === 'today' ? 'today' : ''} ${day.toString('dddd MMMM d')} ${this.getMarkingLabel(day)}`;
+    const days = dateutils.page(this.state.currentMonth, this.props.firstDay);
 
+    if (days.length < 36)
+      days_len = 110;
+    else
+      days_len = 90;
+
+    if(this.props.calendar_flag)
+    return (
+      <View style = {[this.style.home_day, {height:days_len}]}>
+      <View style={{ flex: 1, alignItems: 'center' }} key={id}>
+        <DayComp
+          testID={`${SELECT_DATE_SLOT}-${dateAsObject.dateString}`}
+          state={state}
+          theme={this.props.theme}
+          onPress={this.pressDay}
+          onLongPress={this.longPressDay}
+          date={dateAsObject}
+          marking={this.getDateMarking(day)}
+          accessibilityLabel={accessibilityLabel}
+        >
+          {date}
+        </DayComp>
+      </View>
+      <View style={this.style.home_line}/>
+      </View>
+    );
+
+    else
     return (
       <View style={{flex: 1, alignItems: 'center'}} key={id}>
         <DayComp
@@ -197,28 +247,29 @@ class Calendar extends Component {
         </DayComp>
       </View>
     );
+
   }
 
   getMarkingLabel(day) {
     let label = '';
     const marking = this.getDateMarking(day);
-    
+
     if (marking.accessibilityLabel) {
       return marking.accessibilityLabel;
     }
-    
+
     if (marking.selected) {
       label += 'selected ';
       if (!marking.marked) {
         label += 'You have no entries for this day ';
       }
-    } 
+    }
     if (marking.marked) {
       label += 'You have entries for this day ';
-    } 
+    }
     if (marking.startingDay) {
       label += 'period start ';
-    } 
+    }
     if (marking.endingDay) {
       label += 'period end ';
     }
@@ -234,16 +285,16 @@ class Calendar extends Component {
     }
 
     switch (this.props.markingType) {
-    case 'period':
-      return UnitDay;
-    case 'multi-dot':
-      return MultiDotDay;
-    case 'multi-period':
-      return MultiPeriodDay;
-    case 'custom':
-      return SingleDay;
-    default:
-      return Day;
+      case 'period':
+        return UnitDay;
+      case 'multi-dot':
+        return MultiDotDay;
+      case 'multi-period':
+        return MultiPeriodDay;
+      case 'custom':
+        return SingleDay;
+      default:
+        return Day;
     }
   }
 
@@ -262,10 +313,10 @@ class Calendar extends Component {
 
   renderWeekNumber(weekNumber) {
     return (
-      <Day 
-        key={`week-${weekNumber}`} 
-        theme={this.props.theme} 
-        marking={{disableTouchEvent: true}} 
+      <Day
+        key={`week-${weekNumber}`}
+        theme={this.props.theme}
+        marking={{ disableTouchEvent: true }}
         state='disabled'
       >
         {weekNumber}
@@ -283,6 +334,9 @@ class Calendar extends Component {
       week.unshift(this.renderWeekNumber(days[days.length - 1].getWeek()));
     }
 
+    if(this.props.calendar_flag)
+    return (<View style={[this.style.home_week, {height:days_len}]} key={id}>{week}</View>);
+    else
     return (<View style={this.style.week} key={id}>{week}</View>);
   }
 
@@ -298,11 +352,58 @@ class Calendar extends Component {
     if (current) {
       const lastMonthOfDay = current.clone().addMonths(1, true).setDate(1).addDays(-1).toString('yyyy-MM-dd');
       if (this.props.displayLoadingIndicator &&
-          !(this.props.markedDates && this.props.markedDates[lastMonthOfDay])) {
+        !(this.props.markedDates && this.props.markedDates[lastMonthOfDay])) {
         indicator = true;
       }
     }
 
+    if(this.props.calendar_flag) {
+
+    return (
+      <View
+        style={[this.style.home_container, this.props.style]}
+        accessibilityElementsHidden={this.props.accessibilityElementsHidden} // iOS
+        importantForAccessibility={this.props.importantForAccessibility} // Android
+      >
+        <CalendarHeader
+          testID={this.props.testID}
+          ref={c => this.header = c}
+          style={this.props.headerStyle}
+          theme={this.props.theme}
+          hideArrows={this.props.hideArrows}
+          month={this.state.currentMonth}
+          addMonth={this.addMonth}
+          showIndicator={indicator}
+          firstDay={this.props.firstDay}
+          renderArrow={this.props.renderArrow}
+          monthFormat={this.props.monthFormat}
+          hideDayNames={this.props.hideDayNames}
+          weekNumbers={this.props.showWeekNumbers}
+          onPressArrowLeft={this.props.onPressArrowLeft}
+          onPressArrowRight={this.props.onPressArrowRight}
+          webAriaLevel={this.props.webAriaLevel}
+          disableArrowLeft={this.props.disableArrowLeft}
+          disableArrowRight={this.props.disableArrowRight}
+        />
+        <FlingGestureHandler
+                  ref={ref=>this.leftFlinger=ref}
+                  direction={Directions.LEFT}
+                  onHandlerStateChange={ev =>
+                    this._onLeftFlingHandlerStateChange(ev)
+                  }>
+                <FlingGestureHandler
+                  ref={ref=>this.rightFlinger=ref}
+                  direction={Directions.RIGHT}
+                  onHandlerStateChange={ev =>
+                    this._onRightFlingHandlerStateChange(ev)
+                  }>
+        <View style={this.style.home_monthView}>{weeks}</View>
+        </FlingGestureHandler>
+        </FlingGestureHandler>
+      </View>);
+    }
+
+    else
     return (
       <View
         style={[this.style.container, this.props.style]}
