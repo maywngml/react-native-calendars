@@ -45,6 +45,14 @@ export default function getStyle(theme={}) {
       height:1,
       backgroundColor: "lightgray"
     },
+    modal_container: {
+      alignItems:"center",
+        width:340,
+        height:400,
+        backgroundColor: 'white',
+        borderRadius: 10,
+        left: wp("4%")
+    },
     ...(theme[STYLESHEET_ID] || {})
   });
 }

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, ViewPropTypes } from 'react-native';
+import { View, ViewPropTypes, TouchableOpacity, TouchableHighlight } from 'react-native';
 import PropTypes from 'prop-types';
 import XDate from 'xdate';
 
@@ -23,6 +23,10 @@ const EmptyArray = [];
 
 //주수에 따른 달력 높이 설정 위한 변수
 var days_len;
+// 달력 일자 마킹구분위한 변수
+var marking_flag = false;
+//day view 구분 위한 변수
+var day_id = 0;
 
 /**
  * @description: Calendar component
@@ -100,7 +104,8 @@ class Calendar extends Component {
     this.style = styleConstructor(this.props.theme);
 
     this.state = {
-      currentMonth: props.current ? parseDate(props.current) : XDate()
+      currentMonth: props.current ? parseDate(props.current) : XDate(),
+      CalendarModalVisible: false
     };
 
     this.updateMonth = this.updateMonth.bind(this);
@@ -124,6 +129,31 @@ class Calendar extends Component {
     }
   }
 
+  /*
+       name:  toggleModal
+       description: show yearmonthday picker
+   */
+  toggleCalendarModal = (day) => {
+    this.setState({ CalendarModalVisible: !this.state.CalendarModalVisible });
+    alert(JSON.stringify(day));
+
+  }
+  //modal 페이지 생성
+  setModalPage = (day) => {
+    alert(JSON.stringify(day));
+    return (<View style={[this.style.home_day, { height: days_len }]} key={day} >
+        <Modal isVisible={true} onBackdropPress={() => { this.toggleCalendarModal() }} >
+      <View style={this.style.modal_container} zindex={5}>
+
+      </View>
+    </Modal>
+    </View>
+    ); 
+  }
+
+  setflag = () => {
+
+  }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
     const current = parseDate(nextProps.current);
@@ -209,44 +239,50 @@ class Calendar extends Component {
     else
       days_len = 90;
 
-    if(this.props.calendar_flag)
-    return (
-      <View style = {[this.style.home_day, {height:days_len}]}>
-      <View style={{ flex: 1, alignItems: 'center' }} key={id}>
-        <DayComp
-          testID={`${SELECT_DATE_SLOT}-${dateAsObject.dateString}`}
-          state={state}
-          theme={this.props.theme}
-          onPress={this.pressDay}
-          onLongPress={this.longPressDay}
-          date={dateAsObject}
-          marking={this.getDateMarking(day)}
-          accessibilityLabel={accessibilityLabel}
-        >
-          {date}
-        </DayComp>
-      </View>
-      <View style={this.style.home_line}/>
-      </View>
-    );
+    if (this.props.calendar_flag)
+      return (
+        <TouchableOpacity onPress={() => {   /* this.setModalPage(day)  ; */this.toggleCalendarModal(day) }}>
+          <View style={[this.style.home_day, { height: days_len }]} key={day} >
+            <View style={{ flex: 1, alignItems: 'center' }} key={id}>
+              <DayComp
+                testID={`${SELECT_DATE_SLOT}-${dateAsObject.dateString}`}
+                state={state}
+                theme={this.props.theme}
+                onPress={this.pressDay}
+                onLongPress={this.longPressDay}
+                date={dateAsObject}
+                marking={this.getDateMarking(day)}
+                accessibilityLabel={accessibilityLabel}
+              >
+                {date}
+              </DayComp>
+              
+            </View>
+            
+            <View style={this.style.home_line} />
+          </View>
+          
+        </TouchableOpacity>
+
+      );
 
     else
-    return (
-      <View style={{flex: 1, alignItems: 'center'}} key={id}>
-        <DayComp
-          testID={`${SELECT_DATE_SLOT}-${dateAsObject.dateString}`}
-          state={state}
-          theme={this.props.theme}
-          onPress={this.pressDay}
-          onLongPress={this.longPressDay}
-          date={dateAsObject}
-          marking={this.getDateMarking(day)}
-          accessibilityLabel={accessibilityLabel}
-        >
-          {date}
-        </DayComp>
-      </View>
-    );
+      return (
+        <View style={{ flex: 1, alignItems: 'center' }} key={id}>
+          <DayComp
+            testID={`${SELECT_DATE_SLOT}-${dateAsObject.dateString}`}
+            state={state}
+            theme={this.props.theme}
+            onPress={this.pressDay}
+            onLongPress={this.longPressDay}
+            date={dateAsObject}
+            marking={this.getDateMarking(day)}
+            accessibilityLabel={accessibilityLabel}
+          >
+            {date}
+          </DayComp>
+        </View>
+      );
 
   }
 
@@ -334,10 +370,11 @@ class Calendar extends Component {
       week.unshift(this.renderWeekNumber(days[days.length - 1].getWeek()));
     }
 
-    if(this.props.calendar_flag)
-    return (<View style={[this.style.home_week, {height:days_len}]} key={id}>{week}</View>);
+    if (this.props.calendar_flag)
+      return (<View style={[this.style.home_week, { height: days_len }]} key={id}>{week}
+                </View>);
     else
-    return (<View style={this.style.week} key={id}>{week}</View>);
+      return (<View style={this.style.week} key={id}>{week}</View>);
   }
 
   render() {
@@ -357,81 +394,86 @@ class Calendar extends Component {
       }
     }
 
-    if(this.props.calendar_flag) {
+    if (this.props.calendar_flag) {
 
-    return (
-      <View
-        style={[this.style.home_container, this.props.style]}
-        accessibilityElementsHidden={this.props.accessibilityElementsHidden} // iOS
-        importantForAccessibility={this.props.importantForAccessibility} // Android
-      >
-        <CalendarHeader
-          testID={this.props.testID}
-          ref={c => this.header = c}
-          style={this.props.headerStyle}
-          theme={this.props.theme}
-          hideArrows={this.props.hideArrows}
-          month={this.state.currentMonth}
-          addMonth={this.addMonth}
-          showIndicator={indicator}
-          firstDay={this.props.firstDay}
-          renderArrow={this.props.renderArrow}
-          monthFormat={this.props.monthFormat}
-          hideDayNames={this.props.hideDayNames}
-          weekNumbers={this.props.showWeekNumbers}
-          onPressArrowLeft={this.props.onPressArrowLeft}
-          onPressArrowRight={this.props.onPressArrowRight}
-          webAriaLevel={this.props.webAriaLevel}
-          disableArrowLeft={this.props.disableArrowLeft}
-          disableArrowRight={this.props.disableArrowRight}
-        />
-        <FlingGestureHandler
-                  ref={ref=>this.leftFlinger=ref}
-                  direction={Directions.LEFT}
-                  onHandlerStateChange={ev =>
-                    this._onLeftFlingHandlerStateChange(ev)
-                  }>
-                <FlingGestureHandler
-                  ref={ref=>this.rightFlinger=ref}
-                  direction={Directions.RIGHT}
-                  onHandlerStateChange={ev =>
-                    this._onRightFlingHandlerStateChange(ev)
-                  }>
-        <View style={this.style.home_monthView}>{weeks}</View>
-        </FlingGestureHandler>
-        </FlingGestureHandler>
-      </View>);
+      return (
+        <View
+          style={[this.style.home_container, this.props.style ]}
+          accessibilityElementsHidden={this.props.accessibilityElementsHidden} // iOS
+          importantForAccessibility={this.props.importantForAccessibility} // Android
+        >
+          <CalendarHeader
+            testID={this.props.testID}
+            ref={c => this.header = c}
+            style={this.props.headerStyle}
+            theme={this.props.theme}
+            hideArrows={this.props.hideArrows}
+            month={this.state.currentMonth}
+            addMonth={this.addMonth}
+            showIndicator={indicator}
+            firstDay={this.props.firstDay}
+            renderArrow={this.props.renderArrow}
+            monthFormat={this.props.monthFormat}
+            hideDayNames={this.props.hideDayNames}
+            weekNumbers={this.props.showWeekNumbers}
+            onPressArrowLeft={this.props.onPressArrowLeft}
+            onPressArrowRight={this.props.onPressArrowRight}
+            webAriaLevel={this.props.webAriaLevel}
+            disableArrowLeft={this.props.disableArrowLeft}
+            disableArrowRight={this.props.disableArrowRight}
+          />
+          <FlingGestureHandler
+            ref={ref => this.leftFlinger = ref}
+            direction={Directions.LEFT}
+            onHandlerStateChange={ev =>
+              this._onLeftFlingHandlerStateChange(ev)
+            }>
+            <FlingGestureHandler
+              ref={ref => this.rightFlinger = ref}
+              direction={Directions.RIGHT}
+              onHandlerStateChange={ev =>
+                this._onRightFlingHandlerStateChange(ev)
+              }>
+              <View style={this.style.home_monthView}>{weeks}
+             </View>
+            </FlingGestureHandler>
+          </FlingGestureHandler>
+          
+        </View>
+      );
     }
 
     else
-    return (
-      <View
-        style={[this.style.container, this.props.style]}
-        accessibilityElementsHidden={this.props.accessibilityElementsHidden} // iOS
-        importantForAccessibility={this.props.importantForAccessibility} // Android
-      >
-        <CalendarHeader
-          testID={this.props.testID}
-          ref={c => this.header = c}
-          style={this.props.headerStyle}
-          theme={this.props.theme}
-          hideArrows={this.props.hideArrows}
-          month={this.state.currentMonth}
-          addMonth={this.addMonth}
-          showIndicator={indicator}
-          firstDay={this.props.firstDay}
-          renderArrow={this.props.renderArrow}
-          monthFormat={this.props.monthFormat}
-          hideDayNames={this.props.hideDayNames}
-          weekNumbers={this.props.showWeekNumbers}
-          onPressArrowLeft={this.props.onPressArrowLeft}
-          onPressArrowRight={this.props.onPressArrowRight}
-          webAriaLevel={this.props.webAriaLevel}
-          disableArrowLeft={this.props.disableArrowLeft}
-          disableArrowRight={this.props.disableArrowRight}
-        />
-        <View style={this.style.monthView}>{weeks}</View>
-      </View>);
+      return (
+        <View
+          style={[this.style.container, this.props.style]}
+          accessibilityElementsHidden={this.props.accessibilityElementsHidden} // iOS
+          importantForAccessibility={this.props.importantForAccessibility} // Android
+        >
+          <CalendarHeader
+            testID={this.props.testID}
+            ref={c => this.header = c}
+            style={this.props.headerStyle}
+            theme={this.props.theme}
+            hideArrows={this.props.hideArrows}
+            month={this.state.currentMonth}
+            addMonth={this.addMonth}
+            showIndicator={indicator}
+            firstDay={this.props.firstDay}
+            renderArrow={this.props.renderArrow}
+            monthFormat={this.props.monthFormat}
+            hideDayNames={this.props.hideDayNames}
+            weekNumbers={this.props.showWeekNumbers}
+            onPressArrowLeft={this.props.onPressArrowLeft}
+            onPressArrowRight={this.props.onPressArrowRight}
+            webAriaLevel={this.props.webAriaLevel}
+            disableArrowLeft={this.props.disableArrowLeft}
+            disableArrowRight={this.props.disableArrowRight}
+          />
+          <View style={this.style.monthView}>{weeks}</View>
+          
+        </View>
+      );
   }
 }
 
