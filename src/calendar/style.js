@@ -26,7 +26,7 @@ export default function getStyle(theme={}) {
       backgroundColor: appStyle.calendarBackground
     },
     home_monthView: {
-      height: 480
+      height: 500
     },
     home_week: {
       marginBottom: 0.5,
@@ -44,14 +44,6 @@ export default function getStyle(theme={}) {
       width:wp("100%"),
       height:1,
       backgroundColor: "lightgray"
-    },
-    modal_container: {
-      alignItems:"center",
-        width:340,
-        height:400,
-        backgroundColor: 'white',
-        borderRadius: 10,
-        left: wp("4%")
     },
     ...(theme[STYLESHEET_ID] || {})
   });

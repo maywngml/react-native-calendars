@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, ViewPropTypes, TouchableOpacity, TouchableHighlight } from 'react-native';
+import { View, ViewPropTypes, TouchableOpacity, TouchableHighlight, Text } from 'react-native';
 import PropTypes from 'prop-types';
 import XDate from 'xdate';
 
@@ -15,11 +15,11 @@ import CalendarHeader from './header';
 import shouldComponentUpdate from './updater';
 import { SELECT_DATE_SLOT } from '../testIDs';
 import { FlingGestureHandler, State, Directions } from 'react-native-gesture-handler'
-import Modal from 'react-native-modal';
 
 //Fallback when RN version is < 0.44
 const viewPropTypes = ViewPropTypes || View.propTypes;
 const EmptyArray = [];
+
 
 //주수에 따른 달력 높이 설정 위한 변수
 var days_len;
@@ -97,6 +97,7 @@ class Calendar extends Component {
     calendar_flag: PropTypes.bool
   };
 
+
   constructor(props) {
     super(props);
 
@@ -105,7 +106,6 @@ class Calendar extends Component {
 
     this.state = {
       currentMonth: props.current ? parseDate(props.current) : XDate(),
-      CalendarModalVisible: false
     };
 
     this.updateMonth = this.updateMonth.bind(this);
@@ -113,6 +113,7 @@ class Calendar extends Component {
     this.pressDay = this.pressDay.bind(this);
     this.longPressDay = this.longPressDay.bind(this);
     this.shouldComponentUpdate = shouldComponentUpdate;
+    
   }
 
   //swipe 기능 설정
@@ -127,32 +128,6 @@ class Calendar extends Component {
     if (nativeEvent.oldState === State.ACTIVE) {
       this.addMonth(-1);
     }
-  }
-
-  /*
-       name:  toggleModal
-       description: show yearmonthday picker
-   */
-  toggleCalendarModal = (day) => {
-    this.setState({ CalendarModalVisible: !this.state.CalendarModalVisible });
-    alert(JSON.stringify(day));
-
-  }
-  //modal 페이지 생성
-  setModalPage = (day) => {
-    alert(JSON.stringify(day));
-    return (<View style={[this.style.home_day, { height: days_len }]} key={day} >
-        <Modal isVisible={true} onBackdropPress={() => { this.toggleCalendarModal() }} >
-      <View style={this.style.modal_container} zindex={5}>
-
-      </View>
-    </Modal>
-    </View>
-    ); 
-  }
-
-  setflag = () => {
-
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
@@ -234,6 +209,7 @@ class Calendar extends Component {
     const accessibilityLabel = `${state === 'today' ? 'today' : ''} ${day.toString('dddd MMMM d')} ${this.getMarkingLabel(day)}`;
     const days = dateutils.page(this.state.currentMonth, this.props.firstDay);
 
+
     if (days.length < 36)
       days_len = 110;
     else
@@ -241,7 +217,7 @@ class Calendar extends Component {
 
     if (this.props.calendar_flag)
       return (
-        <TouchableOpacity onPress={() => {   /* this.setModalPage(day)  ; */this.toggleCalendarModal(day) }}>
+        <TouchableOpacity onPress={() => {this.props.toggleCalendarModal(dateAsObject.month, dateAsObject.day) } } >
           <View style={[this.style.home_day, { height: days_len }]} key={day} >
             <View style={{ flex: 1, alignItems: 'center' }} key={id}>
               <DayComp
@@ -256,14 +232,14 @@ class Calendar extends Component {
               >
                 {date}
               </DayComp>
-              
+
             </View>
-            
+
             <View style={this.style.home_line} />
           </View>
-          
-        </TouchableOpacity>
 
+        </TouchableOpacity>
+        
       );
 
     else
@@ -372,7 +348,7 @@ class Calendar extends Component {
 
     if (this.props.calendar_flag)
       return (<View style={[this.style.home_week, { height: days_len }]} key={id}>{week}
-                </View>);
+      </View>);
     else
       return (<View style={this.style.week} key={id}>{week}</View>);
   }
@@ -398,9 +374,10 @@ class Calendar extends Component {
 
       return (
         <View
-          style={[this.style.home_container, this.props.style ]}
+          style={[this.style.home_container, this.props.style]}
           accessibilityElementsHidden={this.props.accessibilityElementsHidden} // iOS
           importantForAccessibility={this.props.importantForAccessibility} // Android
+          key={"home"}
         >
           <CalendarHeader
             testID={this.props.testID}
@@ -434,15 +411,14 @@ class Calendar extends Component {
               onHandlerStateChange={ev =>
                 this._onRightFlingHandlerStateChange(ev)
               }>
-              <View style={this.style.home_monthView}>{weeks}
-             </View>
+              <View style={this.style.home_monthView} key={"month"}>{weeks}
+              </View>
             </FlingGestureHandler>
           </FlingGestureHandler>
-          
         </View>
       );
     }
-
+          
     else
       return (
         <View
@@ -471,10 +447,11 @@ class Calendar extends Component {
             disableArrowRight={this.props.disableArrowRight}
           />
           <View style={this.style.monthView}>{weeks}</View>
-          
+
         </View>
       );
   }
+    
 }
 
 export default Calendar;
