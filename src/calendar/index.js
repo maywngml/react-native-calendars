@@ -14,7 +14,8 @@ import SingleDay from './day/custom';
 import CalendarHeader from './header';
 import shouldComponentUpdate from './updater';
 import { SELECT_DATE_SLOT } from '../testIDs';
-import { FlingGestureHandler, State, Directions } from 'react-native-gesture-handler'
+import { FlingGestureHandler, State, Directions } from 'react-native-gesture-handler';
+import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 
 //Fallback when RN version is < 0.44
 const viewPropTypes = ViewPropTypes || View.propTypes;
@@ -23,10 +24,6 @@ const EmptyArray = [];
 
 //주수에 따른 달력 높이 설정 위한 변수
 var days_len;
-// 달력 일자 마킹구분위한 변수
-var marking_flag = false;
-//day view 구분 위한 변수
-var day_id = 0;
 
 /**
  * @description: Calendar component
@@ -140,6 +137,7 @@ class Calendar extends Component {
   }
 
   updateMonth(day, doNotTriggerListeners) {
+    
     if (day.toString('yyyy MM') === this.state.currentMonth.toString('yyyy MM')) {
       return;
     }
@@ -148,6 +146,12 @@ class Calendar extends Component {
     }, () => {
       if (!doNotTriggerListeners) {
         const currMont = this.state.currentMonth.clone();
+
+        if(this.props.calendar_flag)
+        //메인화면의 년과 월을 바꾸는 함수 호출
+        this.props.changeYearMonth(currMont.toString('yyyy'), currMont.toString('MM'));
+
+
         if (this.props.onMonthChange) {
           this.props.onMonthChange(xdateToData(currMont));
         }
@@ -156,6 +160,8 @@ class Calendar extends Component {
         }
       }
     });
+    
+    
   }
 
   _handleDayInteraction(date, interaction) {
@@ -211,14 +217,14 @@ class Calendar extends Component {
 
 
     if (days.length < 36)
-      days_len = 110;
+      days_len = "26.4%";
     else
-      days_len = 90;
+      days_len = "21.9%";
 
     if (this.props.calendar_flag)
       return (
-        <TouchableOpacity onPress={() => {this.props.toggleCalendarModal(dateAsObject.month, dateAsObject.day) } } >
-          <View style={[this.style.home_day, { height: days_len }]} key={day} >
+        <TouchableOpacity onPress={() => { /* this.getDateMarking(day); */ this.props.toggleCalendarModal(); this.props.setDateModal(dateAsObject.month, dateAsObject.day, day.toString().substring(0,3)) } } >
+          <View style={[this.style.home_day, { height: wp(days_len) }]} key={day} >
             <View style={{ flex: 1, alignItems: 'center' }} key={id}>
               <DayComp
                 testID={`${SELECT_DATE_SLOT}-${dateAsObject.dateString}`}
@@ -295,7 +301,7 @@ class Calendar extends Component {
     if (this.props.dayComponent) {
       return this.props.dayComponent;
     }
-
+   
     switch (this.props.markingType) {
       case 'period':
         return UnitDay;
@@ -314,7 +320,7 @@ class Calendar extends Component {
     if (!this.props.markedDates) {
       return false;
     }
-
+    
     const dates = this.props.markedDates[day.toString('yyyy-MM-dd')] || EmptyArray;
     if (dates.length || dates) {
       return dates;
@@ -347,7 +353,7 @@ class Calendar extends Component {
     }
 
     if (this.props.calendar_flag)
-      return (<View style={[this.style.home_week, { height: days_len }]} key={id}>{week}
+      return (<View style={[this.style.home_week, { height: wp(days_len) }]} key={id}>{week}
       </View>);
     else
       return (<View style={this.style.week} key={id}>{week}</View>);
@@ -377,7 +383,6 @@ class Calendar extends Component {
           style={[this.style.home_container, this.props.style]}
           accessibilityElementsHidden={this.props.accessibilityElementsHidden} // iOS
           importantForAccessibility={this.props.importantForAccessibility} // Android
-          key={"home"}
         >
           <CalendarHeader
             testID={this.props.testID}

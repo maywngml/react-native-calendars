@@ -23,22 +23,21 @@ export default function getStyle(theme={}) {
     },
     home_container: {
       width:wp("100%"),
-      backgroundColor: appStyle.calendarBackground
+      height: hp("100%")
     },
     home_monthView: {
-      height: 500
+      height: hp("100%")
     },
     home_week: {
       marginBottom: 0.5,
       flexDirection: 'row',
       justifyContent: 'space-around',
-      width: wp("100%"),
-      height:90
+      width: wp("100%")
     },
     home_day: {
-      width:wp("14.28571428571429%"),
-      height:100,
-      backgroundColor: "white"
+      flex:1,
+      alignItems:'center',
+      width:wp("14.28571428571429%")
     },
     home_line: {
       width:wp("100%"),
