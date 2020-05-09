@@ -37,12 +37,19 @@ export default function getStyle(theme={}) {
     home_day: {
       flex:1,
       alignItems:'center',
-      width:wp("14.28571428571429%")
+      width:wp("14%")
     },
-    home_line: {
-      width:wp("100%"),
-      height:1,
-      backgroundColor: "lightgray"
+    dayContent: {
+      flexDirection:'row',
+      top:wp("1%")
+    },
+    dayContent_theme: {
+      width:wp("0.7%"),
+      height:hp("1.7%")
+    },
+    dayContent_text: {
+      width:wp("12%"),
+      height:hp("1.7%")
     },
     ...(theme[STYLESHEET_ID] || {})
   });
