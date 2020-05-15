@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { View, ViewPropTypes, TouchableOpacity, TouchableHighlight, Text } from 'react-native';
+import { getApi } from '../../../../src/common/common';
 import PropTypes from 'prop-types';
 import XDate from 'xdate';
 
@@ -106,7 +107,8 @@ class Calendar extends Component {
 
     this.state = {
       currentMonth: props.current ? parseDate(props.current) : XDate(),
-      dayBorder: 'default'
+      currentMonth_save: props.current ? parseDate(props.current) : XDate(),
+      dayBorder: props.current ? parseDate(props.current).toString('yyyy-MM-dd') : XDate().toString('yyyy-MM-dd')
     };
 
     this.updateMonth = this.updateMonth.bind(this);
@@ -116,14 +118,26 @@ class Calendar extends Component {
     this.shouldComponentUpdate = shouldComponentUpdate;
   }
 
+  //모달창 달력 날짜 homescreen 달력 날짜에 맞춰 변경
+  changeCalendarHeader() {
+      this.setState({ currentMonth: this.props.Calendarheader_month });
+  }
+
   //날짜 클릭시 dayBorder state 해당 날짜로 변경
-  changeDayBorder = (day) => {
+  changeDayBorder(flag,day) {
+    if(flag)
     this.setState({ dayBorder: day });
+    else {
+    this.setState({ dayBorder: day.dateString});
+    this.props.toggleCalendarModal(); 
+    this.props.setDateModal(day.month, day.day, new Date(day.dateString).getDay())
+    }
+    this._handleDayInteraction(day, this.props.onDayPress);
   }
 
   setDayList(day) {
-    let i=0;
-    /* while(this.props.dayContent.length) {
+    /* let i=0;
+    while(this.props.dayContent.length) {
       if(day===this.props.dayContent[i].day) {
         day_index.concat(this.props.dayContent[i]);
       }
@@ -168,7 +182,7 @@ class Calendar extends Component {
 
         if (this.props.calendar_flag)
           //메인화면의 년과 월을 바꾸는 함수 호출
-          this.props.changeYearMonth(currMont.toString('yyyy'), currMont.toString('MM'));
+          this.props.changeYearMonth(currMont);
 
 
         if (this.props.onMonthChange) {
@@ -179,7 +193,6 @@ class Calendar extends Component {
         }
       }
     });
-
 
   }
 
@@ -200,6 +213,7 @@ class Calendar extends Component {
 
   pressDay(date) {
     this._handleDayInteraction(date, this.props.onDayPress);
+    this.changeDayBorder(false,date);
   }
 
   longPressDay(date) {
@@ -207,7 +221,12 @@ class Calendar extends Component {
   }
 
   addMonth(count) {
+    const date = this.state.currentMonth.toString("dd");
     this.updateMonth(this.state.currentMonth.clone().addMonths(count, true));
+    if(this.state.currentMonth.clone().addMonths(count, true).toString("yyyy-MM")==this.state.currentMonth_save.toString("yyyy-MM"))
+    this.setState({dayBorder:this.state.currentMonth_save.toString('yyyy-MM-dd')});
+    else
+    this.setState({dayBorder:this.state.currentMonth.clone().addMonths(count, true).toString("yyyy-MM-dd").replace(date,"01")});
   }
 
   renderDay(day, id) {
@@ -259,7 +278,7 @@ class Calendar extends Component {
         this.setDayList(day.toString('yyyy-MM-dd'));
       }
  */
-    
+
 
     if (days.length < 36)
       days_len = "25.4%";
@@ -267,15 +286,15 @@ class Calendar extends Component {
       days_len = "21.9%";
 
     if (this.props.calendar_flag)
-      return ( 
-        <TouchableOpacity onPress={() => { this.changeDayBorder(day.toString('yyyy-MM-dd')); this.props.toggleCalendarModal(); this.props.setDateModal(dateAsObject.month, dateAsObject.day, day.toString().substring(0, 3)) }} >
-          <View style={[this.style.home_day, { height: wp(days_len) }, this.state.dayBorder===day.toString('yyyy-MM-dd') ? {borderWidth: 1, borderColor: "purple" } : {borderWidth:0} ]} key={day} >
+      return (
+        <TouchableOpacity onPress={() => { this.changeDayBorder(true,day.toString('yyyy-MM-dd')); this.props.toggleCalendarModal(); this.props.setDateModal(dateAsObject.month, dateAsObject.day, day.toString().substring(0, 3)) }} >
+          <View style={[this.style.home_day, { height: wp(days_len) }, this.state.dayBorder === day.toString('yyyy-MM-dd') ? { borderWidth: 1, borderColor: "purple" } : { borderWidth: 0 }]} key={day} >
             <View style={{ /* flex: 1,  */alignItems: 'center', height: wp("6%") }} key={id}>
               <DayComp
                 testID={`${SELECT_DATE_SLOT}-${dateAsObject.dateString}`}
                 state={state}
                 theme={this.props.theme}
-                onPress={this.changeDayBorder}
+                onPress={this.pressDay}
                 onLongPress={this.longPressDay}
                 date={dateAsObject}
                 /* marking={this.getDateMarking(day)} */
@@ -285,13 +304,13 @@ class Calendar extends Component {
               </DayComp>
 
             </View>
-           {/*  {day_list} */}
+            {/*  {day_list} */}
           </View>
-          
+
         </TouchableOpacity>
 
       );
-      
+
     else
       return (
         <View style={{ flex: 1, alignItems: 'center' }} key={id}>
@@ -309,7 +328,7 @@ class Calendar extends Component {
           </DayComp>
         </View>
       );
-        
+
   }
 
   getMarkingLabel(day) {
@@ -358,9 +377,11 @@ class Calendar extends Component {
       default:
         return Day;
     }
+    
   }
 
   getDateMarking(day) {
+
     if (!this.props.markedDates) {
       return false;
     }
@@ -371,6 +392,7 @@ class Calendar extends Component {
     } else {
       return false;
     }
+
   }
 
   renderWeekNumber(weekNumber) {
@@ -419,6 +441,9 @@ class Calendar extends Component {
         indicator = true;
       }
     }
+
+    /* if(!this.props.calendar_flag)
+    this.changeCalendarHeader(); */
 
     if (this.props.calendar_flag) {
 
@@ -495,7 +520,22 @@ class Calendar extends Component {
             disableArrowLeft={this.props.disableArrowLeft}
             disableArrowRight={this.props.disableArrowRight}
           />
-              <View style={this.style.monthView}>{weeks}</View>
+          <FlingGestureHandler
+            ref={ref => this.leftFlinger = ref}
+            direction={Directions.LEFT}
+            onHandlerStateChange={ev =>
+              this._onLeftFlingHandlerStateChange(ev)
+            }>
+            <FlingGestureHandler
+              ref={ref => this.rightFlinger = ref}
+              direction={Directions.RIGHT}
+              onHandlerStateChange={ev =>
+                this._onRightFlingHandlerStateChange(ev)
+              }>
+              <View style={this.style.monthView} key={"month"}>{weeks}{/* <Text>{JSON.stringify(this.state.currentMonth.toString('yyyy-MM'))}</Text> */}
+              </View>
+            </FlingGestureHandler>
+          </FlingGestureHandler>
         </View>
       );
   }
