@@ -39,18 +39,31 @@ export default function getStyle(theme={}) {
       alignItems:'center',
       width:wp("14%")
     },
-    dayContent: {
+    calendarContent: {
       flexDirection:'row',
       top:wp("1%")
     },
-    dayContent_theme: {
+    calendar_theme: {
       width:wp("0.7%"),
       height:hp("1.7%")
     },
-    dayContent_text: {
+    calendar_text: {
       width:wp("12%"),
       height:hp("1.7%")
     },
+    toDoContent: {
+      top:wp("1%")
+    },
+    toDo_theme: {
+      marginBottom: 1,
+      width:wp("13%"),
+      height:hp("1.7%"),
+      borderRadius: 1
+    },
+   /*  toDo_text: {
+      width:wp("12%"),
+      height:hp("1.7%")
+    }, */
     ...(theme[STYLESHEET_ID] || {})
   });
 }
