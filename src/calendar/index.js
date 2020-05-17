@@ -112,7 +112,8 @@ class Calendar extends Component {
       currentMonth_home: props.current ? parseDate(props.current) : XDate(),
       dayBorder: props.current ? parseDate(props.current).toString('yyyy-MM-dd') : XDate().toString('yyyy-MM-dd'),
       email: "",
-      toDoList: []
+      toDoList: [],
+      calendarList: []
     };
 
     this.updateMonth = this.updateMonth.bind(this);
@@ -132,10 +133,16 @@ class Calendar extends Component {
       }
     });
 
-    const path = "/todolist/getAllDayList/" + JSON.parse(this.state.email);
-    const response = await getApi("ApiToDoList", path);
+    const path_todolist = "/todolist/getAllDayList/" + JSON.parse(this.state.email);
+    const path_calendarlist = "/calendar/getAllDayList/" + JSON.parse(this.state.email);
+    const response_todolist = await getApi("ApiToDoList", path_todolist);
+    const response_calendarlist = await getApi("ApiCalendar", path_calendarlist);
 
-    this.setState({ toDoList: response });
+    this.setState({ toDoList: response_todolist });
+    this.setState({ calendarList: response_calendarlist });
+
+    /* alert(JSON.stringify(this.state.calendarList)); */
+
     this.forceUpdate();
   }
 
@@ -260,6 +267,33 @@ class Calendar extends Component {
     const dateAsObject = xdateToData(day);
     const accessibilityLabel = `${state === 'today' ? 'today' : ''} ${day.toString('dddd MMMM d')} ${this.getMarkingLabel(day)}`;
     const days = dateutils.page(this.state.currentMonth, this.props.firstDay);
+    const marking_flag = this.state.dayBorder === day.toString('yyyy-MM-dd');
+    //할일 목록 저장하는 배열
+    const todo_list = this.state.toDoList && (this.state.toDoList.map(todo_list => {
+      if (day.toString('yyyy.MM.dd') === todo_list.end_date.substring(0, 10))
+        return (
+          <View style={this.style.toDoContent}>
+            <View style={[this.style.toDo_theme, { backgroundColor: getColor(todo_list.color) }]} >
+              <View style={this.style.toDo_text}>
+                <Text style={{ fontSize: 10, color: "white" }}>{todo_list.title}</Text>
+              </View>
+            </View>
+          </View>
+        )
+    }));
+    //일정 목록 저장하는 배열
+    const calendar_list = this.state.calendarList && (this.state.calendarList.map(calendar_list => {
+      if (day.toString('yyyy.MM.dd') === calendar_list.start_date.substring(0, 10))
+        return (
+          <View style={this.style.calendarContent}>
+            <View style={[this.style.calendar_theme, { backgroundColor: getColor(calendar_list.color) }]} >
+              <View style={this.style.calendar_text}>
+                <Text style={{ fontSize: 10, color: "white" }}>{calendar_list.title}</Text>
+              </View>
+            </View>
+          </View>
+        )
+    }));
     let i = 0;
 
     if (days.length < 36)
@@ -269,8 +303,8 @@ class Calendar extends Component {
 
     if (this.props.calendar_flag)
       return (
-        <TouchableOpacity onPress={() => { this.changeDayBorder(true, day.toString('yyyy-MM-dd')); this.props.toggleCalendarModal(); this.props.setDateModal(dateAsObject.month, dateAsObject.day, day.toString().substring(0, 3)) }} >
-          <View style={[this.style.home_day, { height: wp(days_len) }, this.state.dayBorder === day.toString('yyyy-MM-dd') ? { borderWidth: 1, borderColor: "purple" } : { borderWidth: 0 }]} key={day} >
+        <TouchableOpacity onPress={() => { this.changeDayBorder(true, day.toString('yyyy-MM-dd')); this.props.toggleCalendarModal(); this.props.setDateModal(day.toString('MM'), day.toString('dd'), day.toString().substring(0, 3)) }} >
+          <View style={[this.style.home_day, { height: wp(days_len) }, marking_flag ? { borderWidth: 1, borderColor: "purple" } : { borderWidth: 0 }]} key={day} >
             <View style={{ /* flex: 1,  */alignItems: 'center', height: wp("6%") }} key={id}>
               <DayComp
                 testID={`${SELECT_DATE_SLOT}-${dateAsObject.dateString}`}
@@ -286,17 +320,8 @@ class Calendar extends Component {
               </DayComp>
 
             </View>
-            {this.state.toDoList && (this.state.toDoList.map(todo_list => {
-              if (day.toString('yyyy.MM.dd') === todo_list.end_date.substring(0, 10))
-                return (
-                  <View style={this.style.toDoContent}>
-                    <View style={[this.style.toDo_theme, { backgroundColor: getColor(todo_list.color) }]} >
-                 {/*    <View style={this.style.toDo_text}> */}
-                      <Text style={{ fontSize: 10, color: "white" }}>{todo_list.title}</Text>
-                    </View>
-                  </View>
-                )
-            }))}
+            {todo_list}
+            {calendar_list}
           </View>
 
         </TouchableOpacity>
@@ -305,7 +330,7 @@ class Calendar extends Component {
 
     else
       return (
-        <View style={{ flex: 1, alignItems: 'center' }} key={id}>
+        <View style={{ flex: 1, alignItems: 'center' }} key={id} >
           <DayComp
             testID={`${SELECT_DATE_SLOT}-${dateAsObject.dateString}`}
             state={state}
@@ -318,7 +343,7 @@ class Calendar extends Component {
           >
             {date}
           </DayComp>
-        </View>
+        </View >
       );
 
   }

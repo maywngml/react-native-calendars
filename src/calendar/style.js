@@ -60,10 +60,12 @@ export default function getStyle(theme={}) {
       height:hp("1.7%"),
       borderRadius: 1
     },
-   /*  toDo_text: {
+    toDo_text: {
       width:wp("12%"),
-      height:hp("1.7%")
-    }, */
+      height:hp("1.7%"),
+      left:wp("0.5%"),
+      bottom:wp("0.3%")
+    },
     ...(theme[STYLESHEET_ID] || {})
   });
 }
