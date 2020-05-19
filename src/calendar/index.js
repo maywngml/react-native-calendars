@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { View, ViewPropTypes, TouchableOpacity, TouchableHighlight, Text, AsyncStorage } from 'react-native';
 import { getApi, getColor } from '../../../../src/common/common';
+/* import { Colors } from '../../../../styles/colors'; */
 import Amplify, { API } from 'aws-amplify';
 import PropTypes from 'prop-types';
 import XDate from 'xdate';
@@ -29,6 +30,7 @@ const EmptyArray = [];
 var days_len;
 //클릭한 날짜와 일정의 날짜가 같은 목록을 저장하는 배열
 const day_index = [];
+
 
 /**
  * @description: Calendar component
@@ -140,8 +142,6 @@ class Calendar extends Component {
 
     this.setState({ toDoList: response_todolist });
     this.setState({ calendarList: response_calendarlist });
-
-    /* alert(JSON.stringify(this.state.calendarList)); */
 
     this.forceUpdate();
   }
@@ -268,6 +268,7 @@ class Calendar extends Component {
     const accessibilityLabel = `${state === 'today' ? 'today' : ''} ${day.toString('dddd MMMM d')} ${this.getMarkingLabel(day)}`;
     const days = dateutils.page(this.state.currentMonth, this.props.firstDay);
     const marking_flag = this.state.dayBorder === day.toString('yyyy-MM-dd');
+    
     //할일 목록 저장하는 배열
     const todo_list = this.state.toDoList && (this.state.toDoList.map(todo_list => {
       if (day.toString('yyyy.MM.dd') === todo_list.end_date.substring(0, 10))
@@ -287,14 +288,13 @@ class Calendar extends Component {
         return (
           <View style={this.style.calendarContent}>
             <View style={[this.style.calendar_theme, { backgroundColor: getColor(calendar_list.color) }]} >
-              <View style={this.style.calendar_text}>
-                <Text style={{ fontSize: 10, color: "white" }}>{calendar_list.title}</Text>
-              </View>
+            </View>
+            <View style={this.style.calendar_text}>
+              <Text style={{ fontSize: 10, color: "black" }}>{calendar_list.title}</Text>
             </View>
           </View>
         )
     }));
-    let i = 0;
 
     if (days.length < 36)
       days_len = "25.4%";

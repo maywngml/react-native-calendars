@@ -40,16 +40,20 @@ export default function getStyle(theme={}) {
       width:wp("14%")
     },
     calendarContent: {
+      marginBottom: 1,
       flexDirection:'row',
       top:wp("1%")
     },
     calendar_theme: {
       width:wp("0.7%"),
-      height:hp("1.7%")
+      height:hp("1.7%"),
+      left:wp("0.56%")
     },
     calendar_text: {
-      width:wp("12%"),
-      height:hp("1.7%")
+      width:wp("13%"),
+      height:hp("1.7%"),
+      left:wp("0.8%"),
+      bottom:wp("0.3%")
     },
     toDoContent: {
       top:wp("1%")
