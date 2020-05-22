@@ -137,11 +137,16 @@ class Calendar extends Component {
 
     const path_todolist = "/todolist/getAllDayList/" + JSON.parse(this.state.email);
     const path_calendarlist = "/calendar/getAllDayList/" + JSON.parse(this.state.email);
+
+    if(this.props.calendar_flag) {
     const response_todolist = await getApi("ApiToDoList", path_todolist);
     const response_calendarlist = await getApi("ApiCalendar", path_calendarlist);
-
     this.setState({ toDoList: response_todolist });
     this.setState({ calendarList: response_calendarlist });
+    }
+    else {
+    this.setState({ currentMonth: this.props.Calendarheader_month});
+    }
 
     this.forceUpdate();
   }
@@ -153,7 +158,7 @@ class Calendar extends Component {
     else {
       this.setState({ dayBorder: day.dateString });
       this.props.toggleCalendarModal();
-      this.props.setDateModal(day.month, day.day, new Date(day.dateString).getDay())
+      this.props.setDateModal(day.month, day.day, new Date(day.dateString).getDay());
     }
     this._handleDayInteraction(day, this.props.onDayPress);
   }
@@ -226,8 +231,10 @@ class Calendar extends Component {
 
   pressDay(date) {
     this._handleDayInteraction(date, this.props.onDayPress);
-    if (this.props.calendar_flag)
+    if (this.props.calendar_flag) 
       this.changeDayBorder(false, date);
+    /* else
+      this.props.changePickerModal(date); */
   }
 
   longPressDay(date) {
