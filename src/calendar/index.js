@@ -98,7 +98,7 @@ class Calendar extends Component {
     /** Provide aria-level for calendar heading for proper accessibility when used with web (react-native-web) */
     webAriaLevel: PropTypes.number,
     /** calendar flag */
-    calendar_flag: PropTypes.bool
+    calendar_flag: PropTypes.number
   };
 
 
@@ -138,7 +138,7 @@ class Calendar extends Component {
     const path_todolist = "/todolist/getAllDayList/" + JSON.parse(this.state.email);
     const path_calendarlist = "/calendar/getAllDayList/" + JSON.parse(this.state.email);
 
-    if(this.props.calendar_flag) {
+    if(this.props.calendar_flag == 1) {
     const response_todolist = await getApi("ApiToDoList", path_todolist);
     const response_calendarlist = await getApi("ApiCalendar", path_calendarlist);
     this.setState({ toDoList: response_todolist });
@@ -197,7 +197,7 @@ class Calendar extends Component {
       if (!doNotTriggerListeners) {
         const currMont = this.state.currentMonth.clone();
 
-        if (this.props.calendar_flag)
+        if (this.props.calendar_flag == 1)
           //메인화면의 년과 월을 바꾸는 함수 호출
           this.props.changeYearMonth(this.state.currentMonth);
 
@@ -231,10 +231,10 @@ class Calendar extends Component {
 
   pressDay(date) {
     this._handleDayInteraction(date, this.props.onDayPress);
-    if (this.props.calendar_flag) 
+    if (this.props.calendar_flag == 1) 
       this.changeDayBorder(false, date);
-    /* else
-      this.props.changePickerModal(date); */
+    else if (this.props.calendar_flag == 2)
+      this.props.changePickerModal(date, this.state.currentMonth);
   }
 
   longPressDay(date) {
@@ -308,7 +308,7 @@ class Calendar extends Component {
     else
       days_len = "21.9%";
 
-    if (this.props.calendar_flag)
+    if (this.props.calendar_flag == 1)
       return (
         <TouchableOpacity onPress={() => { this.changeDayBorder(true, day.toString('yyyy-MM-dd')); this.props.toggleCalendarModal(); this.props.setDateModal(day.toString('MM'), day.toString('dd'), day.toString().substring(0, 3)) }} >
           <View style={[this.style.home_day, { height: wp(days_len) }, marking_flag ? { borderWidth: 1, borderColor: "purple" } : { borderWidth: 0 }]} key={day} >
@@ -442,7 +442,7 @@ class Calendar extends Component {
       week.unshift(this.renderWeekNumber(days[days.length - 1].getWeek()));
     }
 
-    if (this.props.calendar_flag)
+    if (this.props.calendar_flag == 1)
       return (<View style={[this.style.home_week, { height: wp(days_len) }]} key={id}>{week}
       </View>);
     else
@@ -467,7 +467,7 @@ class Calendar extends Component {
     }
 
 
-    if (this.props.calendar_flag) {
+    if (this.props.calendar_flag == 1) {
 
       return (
         <View
