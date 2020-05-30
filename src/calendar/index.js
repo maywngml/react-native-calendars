@@ -28,9 +28,6 @@ const EmptyArray = [];
 
 //주수에 따른 달력 높이 설정 위한 변수
 var days_len;
-//클릭한 날짜와 일정의 날짜가 같은 목록을 저장하는 배열
-const day_index = [];
-
 
 /**
  * @description: Calendar component
@@ -138,14 +135,15 @@ class Calendar extends Component {
     const path_todolist = "/todolist/getAllDayList/" + JSON.parse(this.state.email);
     const path_calendarlist = "/calendar/getAllDayList/" + JSON.parse(this.state.email);
 
-    if(this.props.calendar_flag == 1) {
-    const response_todolist = await getApi("ApiToDoList", path_todolist);
-    const response_calendarlist = await getApi("ApiCalendar", path_calendarlist);
-    this.setState({ toDoList: response_todolist });
-    this.setState({ calendarList: response_calendarlist });
+    if (this.props.calendar_flag == 1) {
+      const response_todolist = await getApi("ApiToDoList", path_todolist);
+      const response_calendarlist = await getApi("ApiCalendar", path_calendarlist);
+      this.setState({ toDoList: response_todolist });
+      this.setState({ calendarList: response_calendarlist });
     }
     else {
-    this.setState({ currentMonth: this.props.Calendarheader_month});
+      this.setState({ currentMonth: this.props.Calendarheader_month });
+      console.log(this.state.currentMonth);
     }
 
     this.forceUpdate();
@@ -156,9 +154,10 @@ class Calendar extends Component {
     if (flag)
       this.setState({ dayBorder: day });
     else {
+      const day_string = day.dateString.toString();
       this.setState({ dayBorder: day.dateString });
       this.props.toggleCalendarModal();
-      this.props.setDateModal(day.month, day.day, new Date(day.dateString).getDay());
+      this.props.setDateModal(day_string.slice(5, 7), day_string.slice(8, 10), new Date(day.dateString).getDay());
     }
     this._handleDayInteraction(day, this.props.onDayPress);
   }
@@ -231,7 +230,7 @@ class Calendar extends Component {
 
   pressDay(date) {
     this._handleDayInteraction(date, this.props.onDayPress);
-    if (this.props.calendar_flag == 1) 
+    if (this.props.calendar_flag == 1)
       this.changeDayBorder(false, date);
     else if (this.props.calendar_flag == 2)
       this.props.changePickerModal(date, this.state.currentMonth);
@@ -275,10 +274,13 @@ class Calendar extends Component {
     const accessibilityLabel = `${state === 'today' ? 'today' : ''} ${day.toString('dddd MMMM d')} ${this.getMarkingLabel(day)}`;
     const days = dateutils.page(this.state.currentMonth, this.props.firstDay);
     const marking_flag = this.state.dayBorder === day.toString('yyyy-MM-dd');
-    
+    let todo_length = 0;
+    let calendar_length = 0;
+
     //할일 목록 저장하는 배열
     const todo_list = this.state.toDoList && (this.state.toDoList.map(todo_list => {
-      if (day.toString('yyyy.MM.dd') === todo_list.end_date.substring(0, 10))
+      if (day.toString('yyyy.MM.dd') === todo_list.end_date.substring(0, 10) && todo_length < 5) {
+        todo_length += 1;
         return (
           <View style={this.style.toDoContent}>
             <View style={[this.style.toDo_theme, { backgroundColor: getColor(todo_list.color) }]} >
@@ -288,11 +290,14 @@ class Calendar extends Component {
             </View>
           </View>
         )
+      }
     }));
+
     //일정 목록 저장하는 배열
     const calendar_list = this.state.calendarList && (this.state.calendarList.map(calendar_list => {
-      if (day.toString('yyyy.MM.dd') === calendar_list.start_date.substring(0, 10))
-        return (
+      if( day.toString('yyyy.MM.dd') === calendar_list.start_date.substring(0, 10) && (todo_length+calendar_length) < 5) {
+        calendar_length += 1;
+      return (
           <View style={this.style.calendarContent}>
             <View style={[this.style.calendar_theme, { backgroundColor: getColor(calendar_list.color) }]} >
             </View>
@@ -301,7 +306,13 @@ class Calendar extends Component {
             </View>
           </View>
         )
-    }));
+      }
+      
+        }));
+
+    /* if(todo_length > 5) {
+      todo_list.pop();
+    } */
 
     if (days.length < 36)
       days_len = "25.4%";
@@ -312,7 +323,7 @@ class Calendar extends Component {
       return (
         <TouchableOpacity onPress={() => { this.changeDayBorder(true, day.toString('yyyy-MM-dd')); this.props.toggleCalendarModal(); this.props.setDateModal(day.toString('MM'), day.toString('dd'), day.toString().substring(0, 3)) }} >
           <View style={[this.style.home_day, { height: wp(days_len) }, marking_flag ? { borderWidth: 1, borderColor: "purple" } : { borderWidth: 0 }]} key={day} >
-            <View style={{ /* flex: 1,  */alignItems: 'center', height: wp("6%") }} key={id}>
+            <View style={{ /* flex: 1,  */alignItems: 'center', height: wp("6%")  }} key={id}>
               <DayComp
                 testID={`${SELECT_DATE_SLOT}-${dateAsObject.dateString}`}
                 state={state}
@@ -327,8 +338,8 @@ class Calendar extends Component {
               </DayComp>
 
             </View>
-            {todo_list}
-            {calendar_list}
+              {todo_list} 
+              {calendar_list}
           </View>
 
         </TouchableOpacity>
@@ -353,6 +364,7 @@ class Calendar extends Component {
         </View >
       );
 
+  
   }
 
   getMarkingLabel(day) {
