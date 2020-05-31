@@ -230,10 +230,15 @@ class Calendar extends Component {
 
   pressDay(date) {
     this._handleDayInteraction(date, this.props.onDayPress);
-    if (this.props.calendar_flag == 1)
+    if (this.props.calendar_flag == 1) {
       this.changeDayBorder(false, date);
-    else if (this.props.calendar_flag == 2)
+      console.log("main currentMonth: ", this.state.currentMonth);
+    }
+    else if (this.props.calendar_flag == 2) {
       this.props.changePickerModal(date, this.state.currentMonth);
+      console.log("currentMonth: ",this.state.currentMonth);
+    }
+    console.log("바깥 currentMonth: ",this.state.currentMonth);
   }
 
   longPressDay(date) {
@@ -241,12 +246,12 @@ class Calendar extends Component {
   }
 
   addMonth(count) {
-    const date = this.state.currentMonth.toString("dd");
+    const date = this.state.currentMonth.clone().addMonths(count, true).toString("yyyy-MM")+"-01";
     this.updateMonth(this.state.currentMonth.clone().addMonths(count, true));
     if (this.state.currentMonth.clone().addMonths(count, true).toString("yyyy-MM") == this.state.currentMonth_save.toString("yyyy-MM"))
       this.setState({ dayBorder: this.state.currentMonth_save.toString('yyyy-MM-dd') });
     else {
-      this.setState({ dayBorder: this.state.currentMonth.clone().addMonths(count, true).toString("yyyy-MM-dd").replace(date, "01") });
+      this.setState({ dayBorder: date });
     }
   }
 
@@ -321,7 +326,7 @@ class Calendar extends Component {
 
     if (this.props.calendar_flag == 1)
       return (
-        <TouchableOpacity onPress={() => { this.changeDayBorder(true, day.toString('yyyy-MM-dd')); this.props.toggleCalendarModal(); this.props.setDateModal(day.toString('MM'), day.toString('dd'), day.toString().substring(0, 3)) }} >
+        <TouchableOpacity onPress={() => { this.changeDayBorder(true, day.toString('yyyy-MM-dd')); this.props.setDateModal(day.toString('MM'), day.toString('dd'), day.toString().substring(0, 3)); this.props.toggleCalendarModal() }} >
           <View style={[this.style.home_day, { height: wp(days_len) }, marking_flag ? { borderWidth: 1, borderColor: "purple" } : { borderWidth: 0 }]} key={day} >
             <View style={{ /* flex: 1,  */alignItems: 'center', height: wp("6%")  }} key={id}>
               <DayComp
