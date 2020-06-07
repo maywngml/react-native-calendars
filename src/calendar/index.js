@@ -140,10 +140,11 @@ class Calendar extends Component {
       const response_calendarlist = await getApi("ApiCalendar", path_calendarlist);
       this.setState({ toDoList: response_todolist });
       this.setState({ calendarList: response_calendarlist });
+      this.setState({ currentMonth: this.props.Calendarheader_month });
+      console.log("메인 달력: ",this.state.currentMonth);
     }
     else {
       this.setState({ currentMonth: this.props.Calendarheader_month });
-      console.log(this.state.currentMonth);
     }
 
     this.forceUpdate();
@@ -182,6 +183,12 @@ class Calendar extends Component {
       this.setState({
         currentMonth: current.clone()
       });
+    }
+  }
+
+  componentDidUpdate = async() => {
+    if(this.props.calendar_flag == 1) {
+      this.setState({currentMonth : this.props.Calendarheader_month});
     }
   }
 
@@ -232,13 +239,10 @@ class Calendar extends Component {
     this._handleDayInteraction(date, this.props.onDayPress);
     if (this.props.calendar_flag == 1) {
       this.changeDayBorder(false, date);
-      console.log("main currentMonth: ", this.state.currentMonth);
     }
     else if (this.props.calendar_flag == 2) {
       this.props.changePickerModal(date, this.state.currentMonth);
-      console.log("currentMonth: ",this.state.currentMonth);
     }
-    console.log("바깥 currentMonth: ",this.state.currentMonth);
   }
 
   longPressDay(date) {
@@ -483,7 +487,6 @@ class Calendar extends Component {
       }
     }
 
-
     if (this.props.calendar_flag == 1) {
 
       return (
@@ -533,7 +536,6 @@ class Calendar extends Component {
     }
 
     else {
-
       return (
         <View
           style={[this.style.container, this.props.style]}
