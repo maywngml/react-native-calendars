@@ -141,7 +141,7 @@ class Calendar extends Component {
       this.setState({ toDoList: response_todolist });
       this.setState({ calendarList: response_calendarlist });
       this.setState({ currentMonth: this.props.Calendarheader_month });
-      console.log("메인 달력: ",this.state.currentMonth);
+      console.log("메인 달력: ", this.state.currentMonth);
     }
     else {
       this.setState({ currentMonth: this.props.Calendarheader_month });
@@ -186,9 +186,9 @@ class Calendar extends Component {
     }
   }
 
-  componentDidUpdate = async() => {
-    if(this.props.calendar_flag == 1) {
-      this.setState({currentMonth : this.props.Calendarheader_month});
+  componentDidUpdate = async () => {
+    if (this.props.calendar_flag == 1) {
+      this.setState({ currentMonth: this.props.Calendarheader_month });
     }
   }
 
@@ -250,12 +250,18 @@ class Calendar extends Component {
   }
 
   addMonth(count) {
-    const date = this.state.currentMonth.clone().addMonths(count, true).toString("yyyy-MM")+"-01";
+    const date = this.state.currentMonth.clone().addMonths(count, true).toString("yyyy-MM") + "-01";
     this.updateMonth(this.state.currentMonth.clone().addMonths(count, true));
-    if (this.state.currentMonth.clone().addMonths(count, true).toString("yyyy-MM") == this.state.currentMonth_save.toString("yyyy-MM"))
-      this.setState({ dayBorder: this.state.currentMonth_save.toString('yyyy-MM-dd') });
-    else {
-      this.setState({ dayBorder: date });
+    if (this.props.calendar_flag == 1) {
+      if (this.state.currentMonth.clone().addMonths(count, true).toString("yyyy-MM") == this.state.currentMonth_save.toString("yyyy-MM")) {
+        const tmp_date = this.state.currentMonth_save.toString('yyyy-MM-dd')
+        this.setState({ dayBorder: tmp_date });
+        this._handleDayInteraction(tmp_date, this.props.onDayPress);
+      }
+      else {
+        this.setState({ dayBorder: date });
+        this._handleDayInteraction(date, this.props.onDayPress);
+      }
     }
   }
 
@@ -304,9 +310,9 @@ class Calendar extends Component {
 
     //일정 목록 저장하는 배열
     const calendar_list = this.state.calendarList && (this.state.calendarList.map(calendar_list => {
-      if( day.toString('yyyy.MM.dd') === calendar_list.start_date.substring(0, 10) && (todo_length+calendar_length) < 5) {
+      if (day.toString('yyyy.MM.dd') === calendar_list.start_date.substring(0, 10) && (todo_length + calendar_length) < 5) {
         calendar_length += 1;
-      return (
+        return (
           <View style={this.style.calendarContent}>
             <View style={[this.style.calendar_theme, { backgroundColor: getColor(calendar_list.color) }]} >
             </View>
@@ -316,8 +322,8 @@ class Calendar extends Component {
           </View>
         )
       }
-      
-        }));
+
+    }));
 
     /* if(todo_length > 5) {
       todo_list.pop();
@@ -332,7 +338,7 @@ class Calendar extends Component {
       return (
         <TouchableOpacity onPress={() => { this.changeDayBorder(true, day.toString('yyyy-MM-dd')); this.props.setDateModal(day.toString('MM'), day.toString('dd'), day.toString().substring(0, 3)); this.props.toggleCalendarModal() }} >
           <View style={[this.style.home_day, { height: wp(days_len) }, marking_flag ? { borderWidth: 1, borderColor: "purple" } : { borderWidth: 0 }]} key={day} >
-            <View style={{ /* flex: 1,  */alignItems: 'center', height: wp("6%")  }} key={id}>
+            <View style={{ /* flex: 1,  */alignItems: 'center', height: wp("6%") }} key={id}>
               <DayComp
                 testID={`${SELECT_DATE_SLOT}-${dateAsObject.dateString}`}
                 state={state}
@@ -347,8 +353,8 @@ class Calendar extends Component {
               </DayComp>
 
             </View>
-              {todo_list} 
-              {calendar_list}
+            {todo_list}
+            {calendar_list}
           </View>
 
         </TouchableOpacity>
@@ -373,7 +379,7 @@ class Calendar extends Component {
         </View >
       );
 
-  
+
   }
 
   getMarkingLabel(day) {
