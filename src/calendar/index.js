@@ -141,7 +141,6 @@ class Calendar extends Component {
       this.setState({ toDoList: response_todolist });
       this.setState({ calendarList: response_calendarlist });
       this.setState({ currentMonth: this.props.Calendarheader_month });
-      console.log("메인 달력: ", this.state.currentMonth);
     }
     else {
       this.setState({ currentMonth: this.props.Calendarheader_month });
@@ -152,15 +151,22 @@ class Calendar extends Component {
 
   //날짜 클릭시 dayBorder state 해당 날짜로 변경
   changeDayBorder(flag, day) {
-    if (flag)
+    if (flag == 1) {
       this.setState({ dayBorder: day });
-    else {
+      this._handleDayInteraction(true, day, this.props.onDayPress);
+    }
+    else if (flag == 2) {
       const day_string = day.dateString.toString();
       this.setState({ dayBorder: day.dateString });
       this.props.toggleCalendarModal();
       this.props.setDateModal(day_string.slice(5, 7), day_string.slice(8, 10), new Date(day.dateString).getDay());
+      this._handleDayInteraction(true, day, this.props.onDayPress);
     }
-    this._handleDayInteraction(day, this.props.onDayPress);
+    else {
+      console.log("yes: ",day);
+      this.setState({ dayBorder: day.dateString });
+    }
+    
   }
 
   //swipe 기능 설정
@@ -219,10 +225,13 @@ class Calendar extends Component {
 
   }
 
-  _handleDayInteraction(date, interaction) {
+  _handleDayInteraction(flag, date, interaction) {
     const day = parseDate(date);
     const minDate = parseDate(this.props.minDate);
     const maxDate = parseDate(this.props.maxDate);
+
+    if(!flag)
+    this.changeDayBorder(3,date);    
 
     if (!(minDate && !dateutils.isGTE(day, minDate)) && !(maxDate && !dateutils.isLTE(day, maxDate))) {
       const shouldUpdateMonth = this.props.disableMonthChange === undefined || !this.props.disableMonthChange;
@@ -236,31 +245,32 @@ class Calendar extends Component {
   }
 
   pressDay(date) {
-    this._handleDayInteraction(date, this.props.onDayPress);
+    this._handleDayInteraction(false, date, this.props.onDayPress);
     if (this.props.calendar_flag == 1) {
-      this.changeDayBorder(false, date);
+      this.changeDayBorder(2, date);
     }
     else if (this.props.calendar_flag == 2) {
-      this.props.changePickerModal(date, this.state.currentMonth);
+      this.props.changePickerModal(this.state.currentMonth);
     }
   }
 
   longPressDay(date) {
-    this._handleDayInteraction(date, this.props.onDayLongPress);
+    this._handleDayInteraction(true, date, this.props.onDayLongPress);
   }
 
   addMonth(count) {
     const date = this.state.currentMonth.clone().addMonths(count, true).toString("yyyy-MM") + "-01";
     this.updateMonth(this.state.currentMonth.clone().addMonths(count, true));
     if (this.props.calendar_flag == 1) {
+      this.props.changePickerModal(this.state.currentMonth.clone().addMonths(count, true));
       if (this.state.currentMonth.clone().addMonths(count, true).toString("yyyy-MM") == this.state.currentMonth_save.toString("yyyy-MM")) {
         const tmp_date = this.state.currentMonth_save.toString('yyyy-MM-dd')
         this.setState({ dayBorder: tmp_date });
-        this._handleDayInteraction(tmp_date, this.props.onDayPress);
+        this._handleDayInteraction(true, tmp_date, this.props.onDayPress);
       }
       else {
         this.setState({ dayBorder: date });
-        this._handleDayInteraction(date, this.props.onDayPress);
+        this._handleDayInteraction(true, date, this.props.onDayPress);
       }
     }
   }
@@ -336,7 +346,7 @@ class Calendar extends Component {
 
     if (this.props.calendar_flag == 1)
       return (
-        <TouchableOpacity onPress={() => { this.changeDayBorder(true, day.toString('yyyy-MM-dd')); this.props.setDateModal(day.toString('MM'), day.toString('dd'), day.toString().substring(0, 3)); this.props.toggleCalendarModal() }} >
+        <TouchableOpacity onPress={() => { this.changeDayBorder(1, day.toString('yyyy-MM-dd')); this.props.setDateModal(day.toString('MM'), day.toString('dd'), day.toString().substring(0, 3)); this.props.toggleCalendarModal() }} >
           <View style={[this.style.home_day, { height: wp(days_len) }, marking_flag ? { borderWidth: 1, borderColor: "purple" } : { borderWidth: 0 }]} key={day} >
             <View style={{ /* flex: 1,  */alignItems: 'center', height: wp("6%") }} key={id}>
               <DayComp
@@ -346,7 +356,7 @@ class Calendar extends Component {
                 onPress={this.pressDay}
                 onLongPress={this.longPressDay}
                 date={dateAsObject}
-                /* marking={this.getDateMarking(day)} */
+                marking={this.getDateMarking(day)}
                 accessibilityLabel={accessibilityLabel}
               >
                 {date}
