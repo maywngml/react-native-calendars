@@ -163,10 +163,14 @@ class Calendar extends Component {
       this._handleDayInteraction(true, day, this.props.onDayPress);
     }
     else {
-      console.log("yes: ",day);
+      console.log("yes: ", day.dateString);
       this.setState({ dayBorder: day.dateString });
     }
-    
+
+  }
+
+  removeItem = (items, i) => {
+    return items.slice(0, i).concat(items.slice(i+1, items.length))
   }
 
   //swipe 기능 설정
@@ -230,8 +234,8 @@ class Calendar extends Component {
     const minDate = parseDate(this.props.minDate);
     const maxDate = parseDate(this.props.maxDate);
 
-    if(!flag)
-    this.changeDayBorder(3,date);    
+    if (!flag)
+      this.changeDayBorder(3, date);
 
     if (!(minDate && !dateutils.isGTE(day, minDate)) && !(maxDate && !dateutils.isLTE(day, maxDate))) {
       const shouldUpdateMonth = this.props.disableMonthChange === undefined || !this.props.disableMonthChange;
@@ -299,45 +303,82 @@ class Calendar extends Component {
     const accessibilityLabel = `${state === 'today' ? 'today' : ''} ${day.toString('dddd MMMM d')} ${this.getMarkingLabel(day)}`;
     const days = dateutils.page(this.state.currentMonth, this.props.firstDay);
     const marking_flag = this.state.dayBorder === day.toString('yyyy-MM-dd');
+    // 달력 내에 할일과 일정 합쳐서 다섯개까지만 넣기 위해 사용하는 변수
     let todo_length = 0;
+    // 특정 날짜의 할일 목록 갯수를 저장하는 변수
+    let todo_array_length = 0;
+    // 달력 내에 할일과 일정 합쳐서 다섯개까지만 넣기 위해 사용하는 변수
     let calendar_length = 0;
+    // 특정 날짜의 일정 목록 갯수를 저장하는 변수
+    let calendar_array_length = 0;
+    //일정과 할일의 초가 갯수를 저장하는 변수
+    let rest = 0;
+    let rest_flag = false;
+    let rest_view = null;
 
     //할일 목록 저장하는 배열
-    const todo_list = this.state.toDoList && (this.state.toDoList.map(todo_list => {
-      if (day.toString('yyyy.MM.dd') === todo_list.end_date.substring(0, 10) && todo_length < 5) {
-        todo_length += 1;
-        return (
-          <View style={this.style.toDoContent}>
-            <View style={[this.style.toDo_theme, { backgroundColor: getColor(todo_list.color) }]} >
-              <View style={this.style.toDo_text}>
-                <Text style={{ fontSize: 10, color: "white" }}>{todo_list.title}</Text>
+    let todo_list = this.state.toDoList && (this.state.toDoList.map(todo_list => {
+      if (day.toString('yyyy.MM.dd') === todo_list.end_date.substring(0, 10)) {
+        if (todo_length < 5) {
+          todo_array_length += 1;
+          todo_length += 1;
+          return (
+            <View style={this.style.toDoContent}>
+              <View style={[this.style.toDo_theme, { backgroundColor: getColor(todo_list.color) }]} >
+                <View style={this.style.toDo_text}>
+                  <Text style={{ fontSize: 10, color: "white" }}>{todo_list.title}</Text>
+                </View>
               </View>
             </View>
-          </View>
-        )
+          )
+        }
+        else
+          todo_array_length += 1;
       }
     }));
+
+    if (todo_length == 5 && todo_array_length > 5) {
+      todo_list = this.removeItem(todo_list, 4);
+      rest_flag = true;
+    }
 
     //일정 목록 저장하는 배열
-    const calendar_list = this.state.calendarList && (this.state.calendarList.map(calendar_list => {
-      if (day.toString('yyyy.MM.dd') === calendar_list.start_date.substring(0, 10) && (todo_length + calendar_length) < 5) {
-        calendar_length += 1;
-        return (
-          <View style={this.style.calendarContent}>
-            <View style={[this.style.calendar_theme, { backgroundColor: getColor(calendar_list.color) }]} >
+    let calendar_list = this.state.calendarList && (this.state.calendarList.map(calendar_list => {
+      if (day.toString('yyyy.MM.dd') === calendar_list.start_date.substring(0, 10)) {
+        if ((todo_length + calendar_length) < 5) {
+          calendar_array_length +=1;
+          calendar_length += 1;
+          return (
+            <View style={this.style.calendarContent}>
+              <View style={[this.style.calendar_theme, { backgroundColor: getColor(calendar_list.color) }]} >
+              </View>
+              <View style={this.style.calendar_text}>
+                <Text style={{ fontSize: 10, color: "black" }}>{calendar_list.title}</Text>
+              </View>
             </View>
-            <View style={this.style.calendar_text}>
-              <Text style={{ fontSize: 10, color: "black" }}>{calendar_list.title}</Text>
-            </View>
-          </View>
-        )
+          )
+        }
+        else
+          calendar_array_length += 1;
       }
-
     }));
 
-    /* if(todo_length > 5) {
-      todo_list.pop();
-    } */
+    if ((calendar_length + todo_length) == 5 && (calendar_array_length + todo_array_length) >= 6) {
+      calendar_list = this.removeItem(calendar_list,1);
+      console.log(calendar_list);
+      rest_flag = true;
+    }
+
+    if (rest_flag) {
+      rest = (calendar_array_length + todo_array_length) - 4;
+      rest_view = <View style={this.style.calendarContent}>
+        <View style={this.style.calendar_text}>
+          <Text style={{ fontSize: 10, color: "gray" }}>+{rest}</Text>
+        </View>
+      </View>;
+    }
+    else
+      rest_view = null;
 
     if (days.length < 36)
       days_len = "25.4%";
@@ -365,6 +406,7 @@ class Calendar extends Component {
             </View>
             {todo_list}
             {calendar_list}
+            {rest_view}
           </View>
 
         </TouchableOpacity>
