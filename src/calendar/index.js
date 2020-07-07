@@ -28,6 +28,10 @@ const EmptyArray = [];
 
 //주수에 따른 달력 높이 설정 위한 변수
 var days_len;
+let todo_list;
+let calendar_dif_list;
+let calendar_same_list;
+
 
 /**
  * @description: Calendar component
@@ -147,6 +151,28 @@ class Calendar extends Component {
     this.forceUpdate();
   }
 
+   make_list(day) {
+     console.log(day.toString('yyyyMMdd')+1);
+       /* calendar_same_list = this.state.calendarList && (this.state.calendarList.map(calendar_same_list => {
+       let start_no_dot = calendar_same_list.start_date.substring(0, 10).replace(/\./g, '');
+       let end_no_dot = calendar_same_list.end_date.substring(0, 10).replace(/\./g, '');
+       if (start_no_dot == day.toString('yyyyMMdd')) {
+           return (
+             <View style={this.style.calendarContent}>
+               <View style={[this.style.calendar_theme, { backgroundColor: getColor(calendar_same_list.color) }]} >
+               </View>
+               <View style={this.style.calendar_text}>
+                 <Text style={{ fontSize: 10, color: "black" }}>{calendar_same_list.title}</Text>
+               </View>
+             </View>
+           )
+         }
+       }
+     ));
+     return calendar_same_list; */
+   }
+
+
   //swipe 기능 설정
   _onLeftFlingHandlerStateChange = ({ nativeEvent }) => {
     if (nativeEvent.oldState === State.ACTIVE) {
@@ -170,7 +196,7 @@ class Calendar extends Component {
     }
   }
 
-  componentDidUpdate = async (prevProps) => {
+  componentDidUpdate = async () => {
     if (this.props.calendar_flag == 1) {
       this.setState({ currentMonth: this.props.Calendarheader_month });
     }
@@ -287,18 +313,60 @@ class Calendar extends Component {
     // 특정 날짜의 할일 목록 갯수를 저장하는 변수
     let todo_array_length = 0;
     // 달력 내에 할일과 일정 합쳐서 다섯개까지만 넣기 위해 사용하는 변수
-    let calendar_length = 0;
+    let calendar_dif_length = 0;
+    let calendar_same_length = 0;
     // 특정 날짜의 일정 목록 갯수를 저장하는 변수
-    let calendar_array_length = 0;
+    let calendar_dif_array_length = 0;
+    let calendar_same_array_length = 0;
     //일정과 할일의 초가 갯수를 저장하는 변수
     let rest = 0;
     let rest_flag = false;
     let rest_view = null;
+    //일정 목록(state)의 시작일과 종료일 값에서 '.'을 제거한 문자열을 저장
+    let start_no_dot;
+    let end_no_dot;
+
+    //시작일과 종료일이 다른 일정 목록 저장하는 배열
+    let calendar_dif_list = this.state.calendarList && (this.state.calendarList.map(calendar_dif_list => {
+      let theme;
+      let title = null;
+      start_no_dot = calendar_dif_list.start_date.substring(0, 10).replace(/\./g, '');
+      end_no_dot = calendar_dif_list.end_date.substring(0, 10).replace(/\./g, '');
+      if (start_no_dot != end_no_dot) {
+        if (start_no_dot <= day.toString('yyyyMMdd') && day.toString('yyyyMMdd') <= end_no_dot) {
+          if (start_no_dot == day.toString('yyyyMMdd')) {
+            theme = this.style.calendar_start_theme
+            title = calendar_dif_list.title
+          }
+          else if (start_no_dot < day.toString('yyyyMMdd') < end_no_dot) {
+            theme = this.style.calendar_mid_theme
+          }
+          else {
+            theme = this.style.calendar_end_theme
+          }
+          if ((calendar_dif_length) < 4) {
+            calendar_dif_array_length += 1;
+            calendar_dif_length += 1;
+            return (
+              <View style={this.style.toDoContent}>
+                <View style={[theme, { backgroundColor: getColor(calendar_dif_list.color) }]} >
+                  <View style={this.style.toDo_text}>
+                    <Text style={{ fontSize: 10, color: "white" }}>{title}</Text>
+                  </View>
+                </View>
+              </View>
+            )
+          }
+          else
+            calendar_dif_array_length += 1;
+        }
+      }
+    }));
 
     //할일 목록 저장하는 배열
     let todo_list = this.state.toDoList && (this.state.toDoList.map(todo_list => {
       if (day.toString('yyyy.MM.dd') === todo_list.end_date.substring(0, 10)) {
-        if (todo_length < 4) {
+        if (todo_length + calendar_dif_length < 4) {
           todo_array_length += 1;
           todo_length += 1;
           return (
@@ -316,37 +384,44 @@ class Calendar extends Component {
       }
     }));
 
-    //일정 목록 저장하는 배열
-    let calendar_list = this.state.calendarList && (this.state.calendarList.map(calendar_list => {
-      if (day.toString('yyyy.MM.dd') === calendar_list.start_date.substring(0, 10)) {
-        if ((todo_length + calendar_length) < 4) {
-          calendar_array_length += 1;
-          calendar_length += 1;
+    //시작일과 종료일이 같은 일정 목록 저장하는 배열
+    let calendar_same_list = this.state.calendarList && (this.state.calendarList.map(calendar_same_list => {
+      let start_no_dot = calendar_same_list.start_date.substring(0, 10).replace(/\./g, '');
+      if (start_no_dot == day.toString('yyyyMMdd')) {
+        if (todo_length + calendar_dif_length + calendar_same_length < 4) {
+          calendar_same_array_length += 1;
+          calendar_same_length += 1;
           return (
             <View style={this.style.calendarContent}>
-              <View style={[this.style.calendar_theme, { backgroundColor: getColor(calendar_list.color) }]} >
+              <View style={[this.style.calendar_theme, { backgroundColor: getColor(calendar_same_list.color) }]} >
               </View>
               <View style={this.style.calendar_text}>
-                <Text style={{ fontSize: 10, color: "black" }}>{calendar_list.title}</Text>
+                <Text style={{ fontSize: 10, color: "black" }}>{calendar_same_list.title}</Text>
               </View>
             </View>
           )
         }
-        else
-          calendar_array_length += 1;
+        else {
+          calendar_same_array_length += 1;
+        }
       }
-    }));
+    }
+    ));
 
-    if (todo_length == 4 && (calendar_array_length + todo_array_length) >= 5) {
+    if (calendar_dif_length == 4 && (calendar_dif_array_length + todo_array_length) >= 5) {
       rest_flag = true;
     }
 
-    if (calendar_length != 0 && (calendar_length + todo_length) == 4 && (calendar_array_length + todo_array_length) >= 5) {
+    if (todo_length != 0 && (calendar_dif_length + todo_length) == 4 && (calendar_dif_array_length + todo_array_length) >= 5) {
+      rest_flag = true;
+    }
+
+    if (calendar_same_length != 0 && (calendar_dif_length + todo_length + calendar_same_length) == 4 && (calendar_dif_array_length + todo_array_length + calendar_same_array_length) >= 5) {
       rest_flag = true;
     }
 
     if (rest_flag) {
-      rest = (calendar_array_length + todo_array_length) - 4;
+      rest = (calendar_dif_array_length + todo_array_length + calendar_same_array_length) - 4;
       rest_view = <View style={this.style.calendarContent}>
         <View style={this.style.calendar_text}>
           <Text style={{ fontSize: 10, color: "gray" }}>+{rest}</Text>
@@ -381,7 +456,8 @@ class Calendar extends Component {
 
             </View>
             {todo_list}
-            {calendar_list}
+            {calendar_dif_list}
+            {calendar_same_list}
             {rest_view}
           </View>
 
@@ -489,7 +565,6 @@ class Calendar extends Component {
 
   renderWeek(days, id) {
     const week = [];
-    let todo_list = [];
     days.forEach((day, id2) => {
       week.push(this.renderDay(day, id2));
     }, this);
