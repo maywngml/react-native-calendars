@@ -151,28 +151,6 @@ class Calendar extends Component {
     this.forceUpdate();
   }
 
-   make_list(day) {
-     console.log(day.toString('yyyyMMdd')+1);
-       /* calendar_same_list = this.state.calendarList && (this.state.calendarList.map(calendar_same_list => {
-       let start_no_dot = calendar_same_list.start_date.substring(0, 10).replace(/\./g, '');
-       let end_no_dot = calendar_same_list.end_date.substring(0, 10).replace(/\./g, '');
-       if (start_no_dot == day.toString('yyyyMMdd')) {
-           return (
-             <View style={this.style.calendarContent}>
-               <View style={[this.style.calendar_theme, { backgroundColor: getColor(calendar_same_list.color) }]} >
-               </View>
-               <View style={this.style.calendar_text}>
-                 <Text style={{ fontSize: 10, color: "black" }}>{calendar_same_list.title}</Text>
-               </View>
-             </View>
-           )
-         }
-       }
-     ));
-     return calendar_same_list; */
-   }
-
-
   //swipe 기능 설정
   _onLeftFlingHandlerStateChange = ({ nativeEvent }) => {
     if (nativeEvent.oldState === State.ACTIVE) {
@@ -285,7 +263,7 @@ class Calendar extends Component {
     }
   }
 
-  renderDay(day, id) {
+  renderDay(day, id, prev_day, next_day, index) {
     const minDate = parseDate(this.props.minDate);
     const maxDate = parseDate(this.props.maxDate);
     let state = '';
@@ -308,6 +286,7 @@ class Calendar extends Component {
     const dateAsObject = xdateToData(day);
     const accessibilityLabel = `${state === 'today' ? 'today' : ''} ${day.toString('dddd MMMM d')} ${this.getMarkingLabel(day)}`;
     const days = dateutils.page(this.state.currentMonth, this.props.firstDay);
+
     // 달력 내에 할일과 일정 합쳐서 다섯개까지만 넣기 위해 사용하는 변수
     let todo_length = 0;
     // 특정 날짜의 할일 목록 갯수를 저장하는 변수
@@ -325,6 +304,127 @@ class Calendar extends Component {
     //일정 목록(state)의 시작일과 종료일 값에서 '.'을 제거한 문자열을 저장
     let start_no_dot;
     let end_no_dot;
+    //해당날의 할일 목록과 일정 목록의 순서와 정보들을 이중 배열에 저장
+    let  day_list_info;
+    //전날의 할일 목록과 일정 목록의 순서와 정보들을 이중 배열에 저장
+    let prev_day_list_info;
+    //다음날의 할일 목록과 일정 목록의 순서와 정보들을 이중 배열에 저장
+    let next_day_list_info;
+    let i = 0;
+    let prev_i = 0, day_i = 0, next_i = 0;
+
+    let calendar_dif_temp = this.state.calendarList && (this.state.calendarList.map(calendar_temp => {
+      start_no_dot = calendar_temp.start_date.substring(0, 10).replace(/\./g, '');
+      end_no_dot = calendar_temp.end_date.substring(0, 10).replace(/\./g, '');
+      if (start_no_dot != end_no_dot) {
+        if (prev_i < 4 && prev_day != null && start_no_dot <= prev_day.toString('yyyyMMdd') && prev_day.toString('yyyyMMdd') <= end_no_dot) {
+          if (prev_i == 0) {
+            prev_day_list_info = [{ id: "cal_dif", uuid: calendar_temp.uuid, title: calendar_temp.title, color: calendar_temp.color, start_date: start_no_dot, end_date: end_no_dot }];
+          }
+          else {
+            prev_day_list_info.push({ id: "cal_dif", uuid: calendar_temp.uuid, title: calendar_temp.title, color: calendar_temp.color, start_date: start_no_dot, end_date: end_no_dot});
+          }
+          prev_i += 1;
+        }
+        if (day_i < 4 && start_no_dot <= day.toString('yyyyMMdd') && day.toString('yyyyMMdd') <= end_no_dot) {
+          if (day_i == 0) {
+            day_list_info = [{ id: "cal_dif", uuid: calendar_temp.uuid, title: calendar_temp.title, color: calendar_temp.color, start_date: start_no_dot, end_date: end_no_dot }];
+          }
+          else {
+            day_list_info.push({ id: "cal_dif", uuid: calendar_temp.uuid, title: calendar_temp.title, color: calendar_temp.color, start_date: start_no_dot, end_date: end_no_dot});
+          }
+          day_i += 1;
+        }
+        if (next_i < 4 && next_day != null && start_no_dot <= next_day.toString('yyyyMMdd') && next_day.toString('yyyyMMdd') <= end_no_dot) {
+          if (next_i == 0) {
+            next_day_list_info = [{ id: "cal_dif", uuid: calendar_temp.uuid, title: calendar_temp.title, color: calendar_temp.color, start_date: start_no_dot, end_date: end_no_dot }];
+          }
+          else {
+            next_day_list_info.push({ id: "cal_dif", uuid: calendar_temp.uuid, title: calendar_temp.title, color: calendar_temp.color, start_date: start_no_dot, end_date: end_no_dot});
+          }
+          next_i += 1;
+        }
+      }
+    }));
+
+    let calendar_same_temp = this.state.calendarList && (this.state.calendarList.map(calendar_temp => {
+      start_no_dot = calendar_temp.start_date.substring(0, 10).replace(/\./g, '');
+      end_no_dot = calendar_temp.end_date.substring(0, 10).replace(/\./g, '');
+      if (prev_i < 4 && prev_day != null && start_no_dot == prev_day.toString('yyyyMMdd')) {
+        if (prev_i == 0) {
+          prev_day_list_info = [{ id: "cal_same", uuid: calendar_temp.uuid, title: calendar_temp.title, color: calendar_temp.color, start_date: start_no_dot, end_date: "default" }];
+        }
+        else {
+          prev_day_list_info.push({ id: "cal_same", uuid: calendar_temp.uuid, title: calendar_temp.title, color: calendar_temp.color, start_date: start_no_dot, end_date: "default"});
+        }
+        prev_i += 1;
+      }
+      if (day_i < 4 && start_no_dot == day.toString('yyyyMMdd')) {
+        if (day_i == 0) {
+          day_list_info = [{ id: "cal_same", uuid: calendar_temp.uuid, title: calendar_temp.title, color: calendar_temp.color, start_date: start_no_dot, end_date: "default" }];
+        }
+        else {
+          day_list_info.push({ id: "cal_same", uuid: calendar_temp.uuid, title: calendar_temp.title, color: calendar_temp.color, start_date: start_no_dot, end_date: "default"});
+        }
+        day_i += 1;
+      }
+      if (next_i < 4 && next_day != null && start_no_dot == next_day.toString('yyyyMMdd')) {
+        if (next_i == 0) {
+          next_day_list_info = [{ id: "cal_same", uuid: calendar_temp.uuid, title: calendar_temp.title, color: calendar_temp.color, start_date: start_no_dot, end_date: "default" }];
+        }
+        else {
+          next_day_list_info.push({ id: "cal_same", uuid: calendar_temp.uuid, title: calendar_temp.title, color: calendar_temp.color, start_date: start_no_dot, end_date: "default"});
+        }
+        next_i += 1;
+      }
+    }));
+
+    let todo_temp = this.state.toDoList && (this.state.toDoList.map(todo_temp => {
+      if (prev_i < 4 && prev_day != null && prev_day.toString('yyyy.MM.dd') === todo_temp.end_date.substring(0, 10)) {
+        if (prev_i == 0) {
+          prev_day_list_info = [{ id: "todo", uuid: todo_temp.uuid, title: todo_temp.title, color: todo_temp.color, start_date: "default", end_date: todo_temp.end_date.substring(0, 10) }];
+        }
+        else {
+          prev_day_list_info.push({ id: "todo", uuid: todo_temp.uuid, title: todo_temp.title, color: todo_temp.color, start_date: "default", end_date: todo_temp.end_date.substring(0, 10)});
+        }
+        prev_i += 1;
+      }
+      if (day_i < 4 && day != null && day.toString('yyyy.MM.dd') === todo_temp.end_date.substring(0, 10)) {
+        if (day_i == 0) {
+          day_list_info = [{ id: "todo", uuid: todo_temp.uuid, title: todo_temp.title, color: todo_temp.color, start_date: "default", end_date: todo_temp.end_date.substring(0, 10) }];
+        }
+        else {
+          day_list_info.push({ id: "todo", uuid: todo_temp.uuid, title: todo_temp.title, color: todo_temp.color, start_date: "default", end_date: todo_temp.end_date.substring(0, 10)});
+        }
+        day_i += 1;
+      }
+      if (next_i < 4 && next_day != null && next_day.toString('yyyy.MM.dd') === todo_temp.end_date.substring(0, 10)) {
+        if (next_i == 0) {
+          next_day_list_info = [{ id: "todo", uuid: todo_temp.uuid, title: todo_temp.title, color: todo_temp.color, start_date: "default", end_date: todo_temp.end_date.substring(0, 10) }];
+        }
+        else {
+          next_day_list_info.push({ id: "todo", uuid: todo_temp.uuid, title: todo_temp.title, color: todo_temp.color, start_date: "default", end_date: todo_temp.end_date.substring(0, 10)});
+        }
+        next_i += 1;
+      }
+    }));
+
+     /* for(let i=0; i<4; i++) {
+       for(let j=0; j<4; j++) {
+         let start_idx = 0, end_idx = 0, temp_idx = 0;
+         let temp = [['0','0','0','0','0','0']];
+         if(prev_day_list_info[i][1] == day_list_info[j]) {
+           end_idx = j;
+           for(let k=0; k<6; k++) {
+           temp[0][k] = day_list_info[i][k];
+           day_list_info[i][k] = day_list_info[j][k];
+           day_list_info[j][k] = temp[0][k];
+           }
+         } 
+       }
+     }  */
+
+     /* console.log(day_list_info); */
 
     //시작일과 종료일이 다른 일정 목록 저장하는 배열
     let calendar_dif_list = this.state.calendarList && (this.state.calendarList.map(calendar_dif_list => {
@@ -344,7 +444,7 @@ class Calendar extends Component {
           else {
             theme = this.style.calendar_end_theme
           }
-          if ((calendar_dif_length) < 4) {
+          if (calendar_dif_length < 4) {
             calendar_dif_array_length += 1;
             calendar_dif_length += 1;
             return (
@@ -363,32 +463,11 @@ class Calendar extends Component {
       }
     }));
 
-    //할일 목록 저장하는 배열
-    let todo_list = this.state.toDoList && (this.state.toDoList.map(todo_list => {
-      if (day.toString('yyyy.MM.dd') === todo_list.end_date.substring(0, 10)) {
-        if (todo_length + calendar_dif_length < 4) {
-          todo_array_length += 1;
-          todo_length += 1;
-          return (
-            <View style={this.style.toDoContent}>
-              <View style={[this.style.toDo_theme, { backgroundColor: getColor(todo_list.color) }]} >
-                <View style={this.style.toDo_text}>
-                  <Text style={{ fontSize: 10, color: "white" }}>{todo_list.title}</Text>
-                </View>
-              </View>
-            </View>
-          )
-        }
-        else
-          todo_array_length += 1;
-      }
-    }));
-
     //시작일과 종료일이 같은 일정 목록 저장하는 배열
     let calendar_same_list = this.state.calendarList && (this.state.calendarList.map(calendar_same_list => {
-      let start_no_dot = calendar_same_list.start_date.substring(0, 10).replace(/\./g, '');
+      start_no_dot = calendar_same_list.start_date.substring(0, 10).replace(/\./g, '');
       if (start_no_dot == day.toString('yyyyMMdd')) {
-        if (todo_length + calendar_dif_length + calendar_same_length < 4) {
+        if (calendar_dif_length + calendar_same_length < 4) {
           calendar_same_array_length += 1;
           calendar_same_length += 1;
           return (
@@ -408,15 +487,36 @@ class Calendar extends Component {
     }
     ));
 
+    //할일 목록 저장하는 배열
+    let todo_list = this.state.toDoList && (this.state.toDoList.map(todo_list => {
+      if (day.toString('yyyy.MM.dd') === todo_list.end_date.substring(0, 10)) {
+        if (todo_length + calendar_dif_length + calendar_same_length < 4) {
+          todo_array_length += 1;
+          todo_length += 1;
+          return (
+            <View style={this.style.toDoContent}>
+              <View style={[this.style.toDo_theme, { backgroundColor: getColor(todo_list.color) }]} >
+                <View style={this.style.toDo_text}>
+                  <Text style={{ fontSize: 10, color: "white" }}>{todo_list.title}</Text>
+                </View>
+              </View>
+            </View>
+          )
+        }
+        else
+          todo_array_length += 1;
+      }
+    }));
+
     if (calendar_dif_length == 4 && (calendar_dif_array_length + todo_array_length) >= 5) {
       rest_flag = true;
     }
 
-    if (todo_length != 0 && (calendar_dif_length + todo_length) == 4 && (calendar_dif_array_length + todo_array_length) >= 5) {
+    if (calendar_same_length != 0 && (calendar_dif_length + calendar_same_length) == 4 && (calendar_dif_array_length + calendar_same_array_length) >= 5) {
       rest_flag = true;
     }
 
-    if (calendar_same_length != 0 && (calendar_dif_length + todo_length + calendar_same_length) == 4 && (calendar_dif_array_length + todo_array_length + calendar_same_array_length) >= 5) {
+    if (todo_length != 0 && (calendar_dif_length + calendar_same_length + todo_length) == 4 && (calendar_dif_array_length + todo_array_length + calendar_same_length) >= 5) {
       rest_flag = true;
     }
 
@@ -455,9 +555,9 @@ class Calendar extends Component {
               </DayComp>
 
             </View>
-            {todo_list}
             {calendar_dif_list}
             {calendar_same_list}
+            {todo_list}
             {rest_view}
           </View>
 
@@ -565,8 +665,23 @@ class Calendar extends Component {
 
   renderWeek(days, id) {
     const week = [];
+    let i = 0;
+    let prev_day, next_day;
     days.forEach((day, id2) => {
-      week.push(this.renderDay(day, id2));
+      if (i == 0) {
+        prev_day = null;
+        next_day = days[i + 1];
+      }
+      else if (i == 6) {
+        prev_day = days[i - 1];
+        next_day = null;
+      }
+      else {
+        prev_day = days[i - 1];
+        next_day = days[i + 1];
+      }
+      i += 1;
+      week.push(this.renderDay(day, id2, prev_day, next_day, i));
     }, this);
 
     if (this.props.showWeekNumbers) {
