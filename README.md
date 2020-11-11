@@ -8,5 +8,9 @@
 + planty_app 저장 주소
   https://github.com/maywngml/planty_app
   
-# 기능 설명
+---------------
+  
+# 화면 설명
++ 메인 화면
+  메인 화면에는 달력을 배치하였습니다. 
 
