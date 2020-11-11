@@ -27,6 +27,35 @@
     <img src="https://i.esdrop.com/d/uukVIp0lG1.jpg" width="300" height="600">
     
     메인 화면에서 특정 날짜를 클릭하면 모달창이 나타나 일정과 할일 목록의 상세 내용을 확인할 수 있습니다.
+    
++ 일정 화면
+
+  + 추가 화면
+
+    <img src="https://i.esdrop.com/d/ITO0kR40hV.jpg" width="300" height="600">
   
+    모달창의 추가버튼이나 메인화면의 추가버튼을 클릭시 일정 추가 페이지로 이동할 수 있습니다.  
+    상단의 버튼을 이용하여 할일 추가 화면으로 이동할 수 있습니다.
   
+  + 수정 화면
+  
+    <img src="https://i.esdrop.com/d/iQYnzgdw49.jpg" width="300" height="600">
+  
+    모달창에서 특정 일정을 클릭하면 수정 페이지로 이동하게 됩니다.  
+    추가화면과는 다르게 삭제버튼이 새로 생성되며 할일 페이지로 이동할 수 없습니다.
+    
++ 할일 화면
+  
+  + 추가 화면
+    
+    <img src="https://i.esdrop.com/d/bV3E8zUQ6e.jpg" width="300" height="600">  
+    
+    일정 추가화면에서 할일버튼을 클릭하면 할일 추가 화면으로 이동할 수 있습니다.
+    
+   + 수정 화면
+   
+    <img src="https://i.esdrop.com/d/7rAbP3oZMC.jpg" width="300" height="600">
+    
+    모달창에서 특정 할일을 클릭하면 수정 페이지로 이동하게 됩니다.
+    일정의 수정화면과 같이 삭제버튼이 새로 생성되고 일정 페이지로 이동할 수 없습니다.
 
