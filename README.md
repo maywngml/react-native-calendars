@@ -13,13 +13,20 @@
 
   <img src="https://i.esdrop.com/d/OIrsXAtcUl.jpg" width="300" height="600">  
   
-  메인 화면에는 달력을 배치하여 사용자가 자신의 일정을 한눈에 확인할 수 있도록 하였습니다.
+  메인 화면에는 달력을 배치하여 사용자가 자신의 일정을 한눈에 확인할 수 있도록 하였습니다.  
+  일정과 할일의 디자인의 차이를 주어 사용자가 쉽게 구분할 수 있도록 하였습니다.
   
   + 메인 헤더 클릭시  
   
     <img src="https://i.esdrop.com/d/XAcmalOoCu.jpg" width="300" height="600">  
     
     메인 헤더를 클릭하면 날짜 선택 모달창이 나타나 원하는 날짜로 이동할 수 있습니다.
+    
+  + 특정 날짜 클릭시
+  
+    <img src="https://i.esdrop.com/d/uukVIp0lG1.jpg" width="300" height="600">
+    
+    메인 화면에서 특정 날짜를 클릭하면 모달창이 나타나 일정과 할일 목록의 상세 내용을 확인할 수 있습니다.
   
   
 
