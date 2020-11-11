@@ -1,11 +1,11 @@
-import {StyleSheet} from 'react-native';
+import { StyleSheet } from 'react-native';
 import * as defaultStyle from '../style';
-import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen'; 
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 const STYLESHEET_ID = 'stylesheet.calendar.main';
 
-export default function getStyle(theme={}) {
-  const appStyle = {...defaultStyle, ...theme};
+export default function getStyle(theme = {}) {
+  const appStyle = { ...defaultStyle, ...theme };
   return StyleSheet.create({
     container: {
       paddingLeft: 5,
@@ -22,7 +22,7 @@ export default function getStyle(theme={}) {
       justifyContent: 'space-around'
     },
     home_container: {
-      width:wp("100%"),
+      width: wp("100%"),
       height: hp("100%")
     },
     home_monthView: {
@@ -35,40 +35,61 @@ export default function getStyle(theme={}) {
       width: wp("100%")
     },
     home_day: {
-      flex:1,
-      alignItems:'center',
-      width:wp("14%")
+      flex: 1,
+      alignItems: 'center',
+      width: wp("14.3%")
     },
     calendarContent: {
       marginBottom: 1,
-      flexDirection:'row',
-      top:wp("1%")
+      flexDirection: 'row',
+      top: wp("1%")
     },
     calendar_theme: {
-      width:wp("0.7%"),
-      height:hp("1.7%"),
-      left:wp("0.56%")
+      width: wp("0.7%"),
+      height: hp("1.7%"),
+      left: wp("0.56%")
     },
     calendar_text: {
-      width:wp("13%"),
-      height:hp("1.7%"),
-      left:wp("0.8%"),
-      bottom:wp("0.3%")
+      width: wp("13%"),
+      height: hp("1.7%"),
+      left: wp("0.8%"),
+      bottom: wp("0.3%")
+    },
+    calendar_start_theme: {
+      marginBottom: 1,
+      width: wp("13.6%"),
+      height: hp("1.7%"),
+      left: wp("0.3%"),
+      borderTopLeftRadius: 1,
+      borderBottomLeftRadius: 1
+    },
+    calendar_mid_theme: {
+      marginBottom: 1,
+      width: wp("14.5%"),
+      height: hp("1.7%")
+    },
+    calendar_end_theme: {
+      marginBottom: 1,
+      width: wp("14.6%"),
+      height: hp("1.7%"),
+      borderTopRightRadius: 1,
+      borderBottomRightRadius: 1
     },
     toDoContent: {
-      top:wp("1%")
+      marginBottom: 1,
+      top: wp("1%")
     },
     toDo_theme: {
       marginBottom: 1,
-      width:wp("13%"),
-      height:hp("1.7%"),
+      width: wp("13%"),
+      height: hp("1.7%"),
       borderRadius: 1
     },
     toDo_text: {
-      width:wp("12%"),
-      height:hp("1.7%"),
-      left:wp("0.5%"),
-      bottom:wp("0.3%")
+      width: wp("12%"),
+      height: hp("1.7%"),
+      left: wp("0.5%"),
+      bottom: wp("0.3%")
     },
     ...(theme[STYLESHEET_ID] || {})
   });
