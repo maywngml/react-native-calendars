@@ -54,8 +54,8 @@
     
    + 수정 화면
    
-    <img src="https://i.esdrop.com/d/7rAbP3oZMC.jpg" width="300" height="600">
+     <img src="https://i.esdrop.com/d/7rAbP3oZMC.jpg" width="300" height="600">
     
-    모달창에서 특정 할일을 클릭하면 수정 페이지로 이동하게 됩니다.
+    모달창에서 특정 할일을 클릭하면 수정 페이지로 이동하게 됩니다.  
     일정의 수정화면과 같이 삭제버튼이 새로 생성되고 일정 페이지로 이동할 수 없습니다.
 
