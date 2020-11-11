@@ -7,3 +7,6 @@
 > 있습니다.
 + planty_app 저장 주소
   https://github.com/maywngml/planty_app
+  
+# 기능 설명
+
